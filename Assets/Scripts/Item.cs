@@ -41,7 +41,7 @@ public class Item : MonoBehaviour
 
     void OnDrawGizmos()
     {
-        Handles.Label(transform.position, string.Format("[{0}][{1}]", x, y));
+        Handles.Label(transform.position, string.Format("[{0}][{1}]\nID: {2}", x, y, id));
     }
 
     public ItemBase Copy()

@@ -10,6 +10,7 @@ public class Board : MonoBehaviour
     public int minMatch = 3; // Minimum items in line to be a valid match
 
     public float itemSwapTime = 0.1f;
+    public float delayBetweenMatches = 0.2f;
 
     // Reference for loading our tile prefabs
     private GameObject[] _tiles;
@@ -120,15 +121,15 @@ public class Board : MonoBehaviour
     {
         List<Item> matched = new List<Item> { item };
         int leftItem = item.x - 1;  // Imediatelly left item
-        int rightItem = item.y + 1; // Imediatelly right item
+        int rightItem = item.x + 1; // Imediatelly right item
         while (leftItem >= 0 && _items[leftItem, item.y].id == item.id)
         {
-            matched.Add(_items[leftItem, item.x]);
+            matched.Add(_items[leftItem, item.y]);
             leftItem--;
         }
         while (rightItem < width && _items[rightItem, item.y].id == item.id)
         {
-            matched.Add(_items[rightItem, item.x]);
+            matched.Add(_items[rightItem, item.y]);
             rightItem++;
         }
         return matched;
@@ -141,12 +142,12 @@ public class Board : MonoBehaviour
         int upperItem = item.y + 1; // Imediatelly upper item
         while (lowerItem >= 0 && _items[item.x, lowerItem].id == item.id)
         {
-            matched.Add(_items[item.y, lowerItem]);
+            matched.Add(_items[item.x, lowerItem]);
             lowerItem--;
         }
         while (upperItem < height && _items[item.x, upperItem].id == item.id)
         {
-            matched.Add(_items[item.y, upperItem]);
+            matched.Add(_items[item.x, upperItem]);
             upperItem++;
         }
         return matched;
@@ -187,7 +188,6 @@ public class Board : MonoBehaviour
         MatchInfo matchA = GetMatch(a);
         MatchInfo matchB = GetMatch(b);
 
-        Debug.Log(matchA.valid + " " + matchB.valid);
         if (!matchA.valid && !matchB.valid)
         {
             // Swap not resulted in a valid match, undo swap
@@ -196,18 +196,18 @@ public class Board : MonoBehaviour
             yield break;
         }
 
-        // if (matchA.valid)
-        // {
-        //     yield return StartCoroutine(DestroyItems(matchA.match));
-        //     yield return new WaitForSeconds(delayBetweenMatches);
-        //     yield return StartCoroutine(UpdateBoardIndices(matchA));
-        // }
-        // else if (matchB.valid)
-        // {
-        //     yield return StartCoroutine(DestroyItems(matchB.match));
-        //     yield return new WaitForSeconds(delayBetweenMatches);
-        //     yield return StartCoroutine(UpdateBoardIndices(matchB));
-        // }
+        if (matchA.valid)
+        {
+            yield return StartCoroutine(DestroyMatch(matchA.match));
+            yield return new WaitForSeconds(delayBetweenMatches);
+            // yield return StartCoroutine(UpdateBoardIndices(matchA));
+        }
+        else if (matchB.valid)
+        {
+            yield return StartCoroutine(DestroyMatch(matchB.match));
+            yield return new WaitForSeconds(delayBetweenMatches);
+            // yield return StartCoroutine(UpdateBoardIndices(matchB));
+        }
     }
 
     IEnumerator Swap(Item a, Item b)
@@ -219,6 +219,15 @@ public class Board : MonoBehaviour
         UpdateItemPositions(a, b.x, b.y);
         UpdateItemPositions(b, temp.x, temp.y);
         yield return new WaitForSeconds(itemSwapTime);
+    }
+
+    IEnumerator DestroyMatch(List<Item> items)
+    {
+        foreach (var item in items)
+        {
+            yield return StartCoroutine(item.transform.Scale(Vector3.zero, 0.1f));
+            Destroy(item.gameObject);
+        }
     }
 
     void UpdateItemPositions(Item item, int x, int y)

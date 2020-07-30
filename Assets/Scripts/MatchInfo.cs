@@ -7,6 +7,11 @@ public class MatchInfo
     public int matchEnd;
 
     private List<Item> _match = null;
+    public List<Item> match
+    {
+        get { return _match; }
+        set { _match = value; }
+    }
 
     public bool valid
     {
