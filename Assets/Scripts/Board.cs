@@ -197,13 +197,16 @@ public class Board : MonoBehaviour
             // Swap not resulted in a valid match, undo swap
             Debug.Log("Swap not valid");
             yield return StartCoroutine(Swap(a, b));
+            canPlay = true;
             yield break;
         }
 
+        // TODO probably remove these
         if (matchA.valid)
         {
             yield return StartCoroutine(DestroyMatch(matchA.match));
             yield return StartCoroutine(UpdateBoardIndices(matchA));
+
             yield return new WaitForSeconds(delayBetweenMatches);
         }
         else if (matchB.valid)
@@ -212,6 +215,7 @@ public class Board : MonoBehaviour
             yield return StartCoroutine(UpdateBoardIndices(matchB));
             yield return new WaitForSeconds(delayBetweenMatches);
         }
+        yield return StartCoroutine(CheckForMatches());
 
         canPlay = true;
     }
@@ -288,6 +292,24 @@ public class Board : MonoBehaviour
         }
 
         yield return null;
+    }
+
+    IEnumerator CheckForMatches()
+    {
+        for (int x = 0; x < width; x++)
+        {
+            //Loop along y axis
+            for (int y = 0; y < height; y++)
+            {
+                MatchInfo matchInfo = GetMatch(_items[x, y]);
+                if (matchInfo.valid)
+                {
+                    yield return StartCoroutine(DestroyMatch(matchInfo.match));
+                    yield return StartCoroutine(UpdateBoardIndices(matchInfo));
+                    yield return new WaitForSeconds(delayBetweenMatches);
+                }
+            }
+        }
     }
 
     void OnDisable()
