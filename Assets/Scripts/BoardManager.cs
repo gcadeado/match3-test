@@ -1,360 +1,306 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class BoardManager : MonoBehaviour
 {
-    // public int height = 11;
-    // public int width = 7;
+    public int height = 5; // Board height
+    public int width = 5; // Board width
 
-    // public float tileSwapTime = 0.1f;
-    // public float delayBetweenMatches = 0.1f;
+    public int minMatch = 3; // Minimum items in line to be a valid match
 
-    // public int mininumMatchSize = 3;
+    public float itemSwapTime = 0.1f;
+    public float delayBetweenMatches = 0.2f;
 
-    // private GameObject[] _tiles; // Our reference to prefabs
-    // private Item[,] _items; // Board items
+    // Reference for loading our tile prefabs
+    private GameObject[] _tiles;
 
-    // private Item _selectedItem;
+    // Reference to store which item is on each board position
+    private Item[,] _items;
 
-    // //Sets up the outer walls and floor (background) of the game board.
-    // void BoardSetup()
-    // {
+    // Store a reference to the transform of our Board object.
+    private Transform boardHolder;
 
-    //     _items = new Item[width, height];
+    private Item _selectedItem; // Player's current selected item
 
-    //     //Loop along x axis.
-    //     for (int x = 0; x < width; x++)
-    //     {
-    //         //Loop along y axis
-    //         for (int y = 0; y < height; y++)
-    //         {
-    //             _items[x, y] = InstantiateDoddle(x, y);
-    //         }
-    //     }
-    // }
+    public bool canPlay = true;
 
-    // void ClearBoard()
-    // {
-    //     for (int i = 0; i < width; i++)
-    //     {
-    //         for (int j = 0; j < height; j++)
-    //         {
-    //             MatchInfo matchInfo = GetMatchInfo(_items[i, j]);
-    //             if (matchInfo.valid)
-    //             {
-    //                 Destroy(_items[i, j].gameObject);
-    //                 _items[i, j] = InstantiateDoddle(i, j);
-    //                 j--;
-    //             }
-    //         }
-    //     }
-    // }
+    void BoardSetup()
+    {
 
-    // Item InstantiateDoddle(int x, int y)
-    // {
-    //     //Choose a random tile from our array of tile prefabs and prepare to instantiate it.
-    //     GameObject toInstantiate = _tiles[Random.Range(0, _tiles.Length)];
+        //Instantiate Board and set boardHolder to its transform.
+        boardHolder = new GameObject("Board").transform;
 
-    //     //Instantiate the GameObject instance using the prefab chosen for toInstantiate at the Vector3 corresponding to current grid position in loop.
-    //     Item newDoddle = ((GameObject)Instantiate(toInstantiate, new Vector3(x, y, 0f), Quaternion.identity)).GetComponent<Item>();
+        _items = new Item[width, height];
 
-    //     //Set the parent of our newly instantiated object instance to boardHolder, this is just organizational to avoid cluttering hierarchy.
-    //     newDoddle.transform.SetParent(this.transform);
+        //Loop along x axis.
+        for (int x = 0; x < width; x++)
+        {
+            //Loop along y axis
+            for (int y = 0; y < height; y++)
+            {
+                _items[x, y] = InstantiateDoddle(x, y);
+            }
+        }
+    }
 
-    //     //Send change event to new doddle
-    //     newDoddle.OnItemPositionChanged(x, y);
+    Item InstantiateDoddle(int x, int y)
+    {
+        //Choose a random tile from our array of tile prefabs and prepare to instantiate it.
+        GameObject toInstantiate = _tiles[Random.Range(0, _tiles.Length)];
 
-    //     return newDoddle;
-    // }
+        //Instantiate the GameObject instance using the prefab chosen for to Instantiate at the Vector3 corresponding to current grid position in loop.
+        Item newDoddle = ((GameObject)Instantiate(toInstantiate, new Vector3(x, y, 0f), Quaternion.identity)).GetComponent<Item>();
 
-    // void OnMouseOverItem(Item item)
-    // {
-    //     if (_selectedItem == item)
-    //     {
-    //         Debug.Log("Selected same item");
-    //         _selectedItem = null;
-    //         return;
-    //     }
-    //     if (_selectedItem == null)
-    //     {
-    //         _selectedItem = item;
-    //     }
-    //     else
-    //     {
-    //         float xDiff = Mathf.Abs(item.x - _selectedItem.x);
-    //         float yDiff = Mathf.Abs(item.y - _selectedItem.y);
-    //         if (Mathf.Abs(xDiff - yDiff) == 1)
-    //         {
-    //             // We can try to swap items
-    //             StartCoroutine(TryMatch(_selectedItem, item));
-    //         }
-    //         else
-    //         {
-    //             Debug.Log("LOL cannot swap these.");
-    //         }
-    //         _selectedItem = null;
-    //     }
-    // }
+        //Set the parent of our newly instantiated object instance to boardHolder, this is just organizational to avoid cluttering hierarchy.
+        newDoddle.transform.SetParent(boardHolder);
 
-    // IEnumerator TryMatch(Item a, Item b)
-    // {
-    //     yield return StartCoroutine(Swap(a, b)); // We do the swappingz
+        // Set current item position in board
+        newDoddle.SetPosition(x, y);
 
-    //     MatchInfo matchA = GetMatchInfo(a);
-    //     MatchInfo matchB = GetMatchInfo(b);
+        return newDoddle;
+    }
 
-    //     if (!matchA.valid && !matchB.valid) // Swap not resulting in a valid match
-    //     {
-    //         yield return StartCoroutine(Swap(a, b)); // Undo the swap
-    //         yield break; // Return
-    //     }
+    void LoadTiles()
+    {
+        _tiles = Resources.LoadAll<GameObject>("Prefabs");
+        for (int i = 0; i < _tiles.Length; i++)
+        {
+            _tiles[i].GetComponent<Item>().id = i; // Set an UID for the tile
+            Debug.Log(string.Format("Loaded game object {0} with id {1}", _tiles[i].name, i));
+        }
+        Debug.Log(string.Format("Loaded {0} objects", _tiles.Length));
+    }
 
-    //     if (matchA.valid)
-    //     {
-    //         yield return StartCoroutine(DestroyItems(matchA.match));
-    //         yield return new WaitForSeconds(delayBetweenMatches);
-    //         yield return StartCoroutine(UpdateBoardIndices(matchA));
-    //     }
-    //     else if (matchB.valid)
-    //     {
-    //         yield return StartCoroutine(DestroyItems(matchB.match));
-    //         yield return new WaitForSeconds(delayBetweenMatches);
-    //         yield return StartCoroutine(UpdateBoardIndices(matchB));
-    //     }
-    // }
+    void SweepBoard()
+    {
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < height; j++)
+            {
+                MatchInfo match = GetMatch(_items[i, j]);
+                if (match.valid) // We have a match, change this item
+                {
+                    Debug.Log("Found a match on game init, changing tile");
+                    Destroy(_items[i, j].gameObject);
+                    _items[i, j] = InstantiateDoddle(i, j);
+                    j--; // Recheck this position
+                }
+            }
+        }
+    }
 
-    // IEnumerator UpdateBoardIndices(MatchInfo match)
-    // {
-    //     if (match.matchStartY == match.matchEndY)
-    //     {
-    //         for (int i = match.matchStartX; i < match.matchEndX; i++)
-    //         {
-    //             for (int j = match.matchStartY; j < match.matchEndY; j++)
-    //             {
-    //                 Item upperIndex = _items[i, j + 1];
-    //                 Item current = _items[i, j];
-    //                 _items[i, j] = upperIndex;
-    //                 _items[i, j + 1] = current;
-    //                 _items[i, j].OnItemPositionChanged(_items[i, j].x, _items[i, j].y - 1);
-    //                 _items[i, height - 1] = InstantiateDoddle(i, height - 1);
-    //             }
-    //         }
-    //     }
-    //     else if (match.matchStartX == match.matchEndX)
-    //     {
-    //         int matchHeight = (match.matchEndY - match.matchStartY) + 1;
-    //         int currentX = match.matchStartX;
-    //         for (int y = match.matchStartY + matchHeight; y < height - 1; y++)
-    //         {
+    public void Init()
+    {
+        LoadTiles(); // TODO make this a global referenced Scriptable Object
+        BoardSetup();
+        SweepBoard();
 
-    //             Item lowerIndex = _items[currentX, y - matchHeight];
-    //             Item current = _items[currentX, y];
-    //             _items[currentX, y - matchHeight] = current;
-    //             _items[currentX, y] = lowerIndex;
-    //         }
+        // Register a callback to be called everytime player selects an item
+        Item.OnMouseOverItemEventHandler += OnMouseOverItem;
+    }
 
-    //         for (int y = 0; y < height - matchHeight; y++)
-    //         {
-    //             _items[currentX, y].OnItemPositionChanged(currentX, y);
-    //         }
+    MatchInfo GetMatch(Item item)
+    {
+        MatchInfo m = null;
+        List<Item> horizontalMatch = GetMatchHorizontal(item);
+        List<Item> verticalMatch = GetMatchVertical(item);
 
-    //         for (int i = 0; i < match.match.Count; i++)
-    //         {
-    //             _items[currentX, height - 1 - i] = InstantiateDoddle(currentX, height - 1 - i);
-    //         }
-    //     }
-    //     for (int x = 0; x < width; x++)
-    //     {
-    //         //Loop along y axis
-    //         for (int y = 0; y < height; y++)
-    //         {
-    //             MatchInfo matchInfo = GetMatchInfo(_items[x, y]);
-    //             if (match.valid)
-    //             {
-    //                 yield return StartCoroutine(DestroyItems(matchInfo.match));
-    //                 yield return new WaitForSeconds(delayBetweenMatches);
-    //                 yield return StartCoroutine(UpdateBoardIndices(matchInfo));
-    //             }
-    //         }
-    //     }
-    //     yield return null;
-    // }
+        bool shouldPreferenceHorizontal = horizontalMatch.Count >= verticalMatch.Count; // Is the horizontal match higher than the vertical?
 
-    // IEnumerator DestroyItems(List<Item> items)
-    // {
-    //     foreach (var item in items)
-    //     {
-    //         yield return StartCoroutine(item.transform.Scale(Vector3.zero, 0.1f));
-    //         // Destroy(item.gameObject);
-    //     }
-    // }
+        if (shouldPreferenceHorizontal)
+        {
+            m = new MatchInfo(horizontalMatch);
+        }
+        else
+        {
+            m = new MatchInfo(verticalMatch);
+        }
+        return m;
+    }
 
-    // IEnumerator Swap(Item a, Item b)
-    // {
-    //     SetPhysicsStatus(false);
+    List<Item> GetMatchHorizontal(Item item)
+    {
+        List<Item> matched = new List<Item> { item };
+        int leftItem = item.x - 1;  // Imediatelly left item
+        int rightItem = item.x + 1; // Imediatelly right item
+        while (leftItem >= 0 && _items[leftItem, item.y].id == item.id)
+        {
+            matched.Add(_items[leftItem, item.y]);
+            leftItem--;
+        }
+        while (rightItem < width && _items[rightItem, item.y].id == item.id)
+        {
+            matched.Add(_items[rightItem, item.y]);
+            rightItem++;
+        }
+        return matched;
+    }
 
-    //     Vector3 aPos = a.transform.position; // We have to save this in order to move both simultaneously
-    //     StartCoroutine(a.transform.Move(b.transform.position, 0.1f));
-    //     StartCoroutine(b.transform.Move(aPos, 0.1f));
+    List<Item> GetMatchVertical(Item item)
+    {
+        List<Item> matched = new List<Item> { item };
+        int lowerItem = item.y - 1; // Imediatelly lower item
+        int upperItem = item.y + 1; // Imediatelly upper item
+        while (lowerItem >= 0 && _items[item.x, lowerItem].id == item.id)
+        {
+            matched.Add(_items[item.x, lowerItem]);
+            lowerItem--;
+        }
+        while (upperItem < height && _items[item.x, upperItem].id == item.id)
+        {
+            matched.Add(_items[item.x, upperItem]);
+            upperItem++;
+        }
+        return matched;
+    }
 
-    //     yield return new WaitForSeconds(tileSwapTime);
+    void OnMouseOverItem(Item item)
+    {
+        if (_selectedItem == item || !canPlay)
+        {
+            _selectedItem = null;
+            return;
+        }
+        if (_selectedItem == null)
+        {
+            _selectedItem = item;
+        }
+        else
+        {
+            float xDiff = Mathf.Abs(item.x - _selectedItem.x);
+            float yDiff = Mathf.Abs(item.y - _selectedItem.y);
+            if (Mathf.Abs(xDiff - yDiff) == 1)
+            {
+                // Try to swap items
+                StartCoroutine(TryMatch(_selectedItem, item));
+            }
+            else
+            {
+                Debug.Log("This move is forbidden.");
+            }
+            _selectedItem = null;
+        }
+    }
 
-    //     SwapIndices(a, b);
-    //     SetPhysicsStatus(true);
-    // }
+    IEnumerator TryMatch(Item a, Item b)
+    {
+        canPlay = false;
 
-    // void SwapIndices(Item a, Item b)
-    // {
-    //     Item tempA = _items[a.x, a.y];
-    //     _items[a.x, a.y] = b;
-    //     _items[b.x, b.y] = tempA;
-    //     int bOldX = b.x; int bOldY = b.y;
-    //     b.OnItemPositionChanged(a.x, a.y);
-    //     a.OnItemPositionChanged(bOldX, bOldY);
-    // }
+        yield return StartCoroutine(Swap(a, b)); // We do the swappingz
 
-    // public void SetPhysicsStatus(bool status)
-    // {
-    //     foreach (Item item in _items)
-    //     {
-    //         Rigidbody2D rb = item.GetComponent<Rigidbody2D>();
-    //         rb.isKinematic = !status;
-    //     }
-    // }
+        MatchInfo matchA = GetMatch(a);
+        MatchInfo matchB = GetMatch(b);
 
-    // MatchInfo GetMatchInfo(Item item)
-    // {
-    //     MatchInfo m = new MatchInfo();
-    //     List<Item> horizontalMatch = GetMatchHorizontally(item);
-    //     List<Item> verticalMatch = GetMatchVertically(item);
-    //     if (horizontalMatch.Count >= mininumMatchSize && horizontalMatch.Count >= verticalMatch.Count)
-    //     {
-    //         Debug.Log("Got a horizontal match");
-    //         m.matchStartX = GetMinX(horizontalMatch);
-    //         m.matchEndX = GetMaxX(horizontalMatch);
-    //         m.matchStartY = m.matchEndY = horizontalMatch[0].y;
-    //         m.match = horizontalMatch;
-    //     }
-    //     else if (verticalMatch.Count >= mininumMatchSize)
-    //     {
-    //         Debug.Log("Got a vertical match");
-    //         m.matchStartY = GetMinY(horizontalMatch);
-    //         m.matchEndY = GetMaxY(horizontalMatch);
-    //         m.matchStartX = m.matchEndX = verticalMatch[0].x;
-    //         m.match = verticalMatch;
-    //     }
+        if (!matchA.valid && !matchB.valid)
+        {
+            // Swap not resulted in a valid match, undo swap
+            Debug.Log("Swap not valid");
+            yield return StartCoroutine(Swap(a, b));
+            canPlay = true;
+            yield break;
+        }
 
-    //     return m;
-    // }
+        yield return StartCoroutine(CheckForMatches());
 
-    // int GetMinX(List<Item> items)
-    // {
-    //     float[] indices = new float[items.Count];
-    //     for (int i = 0; i < indices.Length; i++)
-    //     {
-    //         indices[i] = items[i].x;
-    //     }
-    //     return (int)Mathf.Min(indices);
-    // }
+        canPlay = true;
+    }
 
-    // int GetMaxX(List<Item> items)
-    // {
-    //     float[] indices = new float[items.Count];
-    //     for (int i = 0; i < indices.Length; i++)
-    //     {
-    //         indices[i] = items[i].x;
-    //     }
-    //     return (int)Mathf.Max(indices);
-    // }
+    IEnumerator Swap(Item a, Item b)
+    {
+        StartCoroutine(a.transform.Move(b.transform.position, itemSwapTime));
+        StartCoroutine(b.transform.Move(a.transform.position, itemSwapTime));
 
-    // int GetMinY(List<Item> items)
-    // {
-    //     float[] indices = new float[items.Count];
-    //     for (int i = 0; i < indices.Length; i++)
-    //     {
-    //         indices[i] = items[i].y;
-    //     }
-    //     return (int)Mathf.Min(indices);
-    // }
+        ItemBase temp = a.Copy();
+        UpdateItemPositions(a, b.x, b.y);
+        UpdateItemPositions(b, temp.x, temp.y);
+        yield return new WaitForSeconds(itemSwapTime);
+    }
 
-    // int GetMaxY(List<Item> items)
-    // {
-    //     float[] indices = new float[items.Count];
-    //     for (int i = 0; i < indices.Length; i++)
-    //     {
-    //         indices[i] = items[i].y;
-    //     }
-    //     return (int)Mathf.Max(indices);
-    // }
+    IEnumerator DestroyMatch(List<Item> items)
+    {
+        foreach (var item in items)
+        {
+            yield return StartCoroutine(item.transform.Scale(Vector3.zero, 0.1f));
+            Destroy(item.gameObject);
+        }
+    }
 
-    // List<Item> GetMatchHorizontally(Item item)
-    // {
-    //     Debug.Log("GetMatchHorizontally");
-    //     List<Item> matched = new List<Item> { item };
-    //     int leftItem = item.x - 1; // Imediatelly left item
-    //     int rightItem = item.x + 1; // Imediatelly right item
-    //     Debug.Log(string.Format("Current item id {0} with X position {1}", item.id, item.x));
-    //     while (leftItem >= 0 && _items[leftItem, item.y].id == item.id)
-    //     {
-    //         matched.Add(_items[leftItem, item.y]);
-    //         leftItem--;
-    //     }
-    //     while (rightItem < width && _items[rightItem, item.y].id == item.id)
-    //     {
-    //         matched.Add(_items[rightItem, item.y]);
-    //         rightItem++;
-    //     }
-    //     Debug.Log(string.Format("Found {0} matched items", matched.Count));
-    //     return matched;
-    // }
+    void UpdateItemPositions(Item item, int x, int y)
+    {
+        _items[x, y] = item;
+        item.SetPosition(x, y);
+    }
 
-    // List<Item> GetMatchVertically(Item item)
-    // {
-    //     List<Item> matched = new List<Item> { item };
-    //     int lowerItem = item.y - 1; // Imediatelly lower item
-    //     int upperItem = item.y + 1; // Imediatelly upper item
-    //     Debug.Log(string.Format("Current item id {0} with Y position {1}", item.id, item.y));
-    //     while (lowerItem >= 0 && _items[item.x, lowerItem].id == item.id)
-    //     {
-    //         matched.Add(_items[item.x, lowerItem]);
-    //         lowerItem--;
-    //     }
-    //     while (upperItem < height && _items[item.x, upperItem].id == item.id)
-    //     {
-    //         matched.Add(_items[item.x, upperItem]);
-    //         upperItem++;
-    //     }
-    //     Debug.Log(string.Format("Found {0} matched items", matched.Count));
-    //     return matched;
-    // }
+    IEnumerator UpdateBoardIndices(MatchInfo match)
+    {
+        int minX = match.GetMinX();
+        int maxX = match.GetMaxX();
+        int minY = match.GetMinY();
+        int maxY = match.GetMaxY();
 
-    // void LoadDoddles()
-    // {
-    //     _tiles = Resources.LoadAll<GameObject>("Prefabs");
-    //     for (int i = 0; i < _tiles.Length; i++)
-    //     {
-    //         _tiles[i].GetComponent<Item>().id = i;
-    //         Debug.Log(string.Format("Loaded game object {0} with id {1}", _tiles[i].name, i));
-    //     }
-    //     Debug.Log(string.Format("Loaded {0} objects", _tiles.Length));
-    // }
+        if (minY == maxY) // We have to update several columns
+        {
+            for (int i = minX; i <= maxX; i++)
+            {
+                for (int j = minY; j < height - 1; j++)
+                {
+                    Item upperIndex = _items[i, j + 1];
+                    Item current = _items[i, j];
+                    _items[i, j] = upperIndex;
+                    _items[i, j + 1] = current;
+                    _items[i, j].SetPosition(_items[i, j].x, _items[i, j].y - 1);
+                }
+                _items[i, height - 1] = InstantiateDoddle(i, height - 1);
+            }
+        }
+        else if (minX == maxX) // We have to update one column
+        {
+            int matchHeight = (maxY - minY) + 1;
+            int currentX = minX;
+            for (int j = minY + matchHeight; j <= height - 1; j++)
+            {
+                Item lowerIndex = _items[currentX, j - matchHeight];
+                Item current = _items[currentX, j];
+                _items[currentX, j - matchHeight] = current;
+                _items[currentX, j] = lowerIndex;
+            }
 
-    // public void SetupScene()
-    // {
-    //     LoadDoddles();
-    //     BoardSetup();
-    //     ClearBoard();
-    //     Item.OnMouseOverItemEventHandler += OnMouseOverItem;
-    // }
+            for (int y = 0; y < height - matchHeight; y++)
+            {
+                _items[currentX, y].SetPosition(currentX, y);
+            }
+            for (int i = 0; i < match.Count; i++)
+            {
+                Debug.Log(string.Format("[{0}][{1}]", currentX, (height - 1) - i));
+                _items[currentX, (height - 1) - i] = InstantiateDoddle(currentX, (height - 1) - i);
+            }
+        }
 
-    // void Start()
-    // {
-    //     SetupScene();
-    // }
-    // void OnDisable()
-    // {
-    //     // Unsubscribe events
-    //     Item.OnMouseOverItemEventHandler -= OnMouseOverItem;
-    // }
+        yield return null;
+    }
+
+    IEnumerator CheckForMatches()
+    {
+        for (int x = 0; x < width; x++)
+        {
+            //Loop along y axis
+            for (int y = 0; y < height; y++)
+            {
+                MatchInfo matchInfo = GetMatch(_items[x, y]);
+                if (matchInfo.valid)
+                {
+                    yield return StartCoroutine(DestroyMatch(matchInfo.match));
+                    yield return StartCoroutine(UpdateBoardIndices(matchInfo));
+                    yield return new WaitForSeconds(delayBetweenMatches);
+                }
+            }
+        }
+    }
+
+    void OnDisable()
+    {
+        Item.OnMouseOverItemEventHandler -= OnMouseOverItem;
+    }
+
 }

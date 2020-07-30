@@ -9,7 +9,7 @@ public class GameManager : MonoBehaviour
 
     public float levelStartDelay = 2f;  //Time to wait before starting a new level, in seconds.
 
-    private Board boardScript;  // Store a reference to our Board which will set up the level.
+    private BoardManager boardScript;  // Store a reference to our BoardManager which will set up the level.
     private int level = 1;  //  Current level number.
     private bool doingSetup = true; // Boolean to check if we're setting and updating up board, prevent various actions during setup.
 
@@ -33,8 +33,8 @@ public class GameManager : MonoBehaviour
         //Sets this to not be destroyed when reloading scene
         DontDestroyOnLoad(gameObject);
 
-        //Get a component reference to the attached Board script
-        boardScript = GetComponent<Board>();
+        //Get a component reference to the attached BoardManager script
+        boardScript = GetComponent<BoardManager>();
 
         //Call the InitGame function to initialize the first level 
         InitGame();
@@ -62,7 +62,7 @@ public class GameManager : MonoBehaviour
         //While doingSetup is true the player can't move, prevent player from moving while title card is up.
         doingSetup = true;
 
-        //Call the Init function of the Board script.
+        //Call the Init function of the BoardManager script.
         boardScript.Init();
 
     }

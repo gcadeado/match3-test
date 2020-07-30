@@ -586,11 +586,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b1f099666347734c842a8f6b9349b24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  height: 5
+  height: 9
   width: 5
   minMatch: 3
   itemSwapTime: 0.1
   delayBetweenMatches: 0.2
+  canPlay: 1
 --- !u!4 &1695954786
 Transform:
   m_ObjectHideFlags: 0
