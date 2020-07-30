@@ -23,6 +23,8 @@ public class Board : MonoBehaviour
 
     private Item _selectedItem; // Player's current selected item
 
+    public bool canPlay = true;
+
     void BoardSetup()
     {
 
@@ -155,7 +157,7 @@ public class Board : MonoBehaviour
 
     void OnMouseOverItem(Item item)
     {
-        if (_selectedItem == item)
+        if (_selectedItem == item || !canPlay)
         {
             _selectedItem = null;
             return;
@@ -183,6 +185,8 @@ public class Board : MonoBehaviour
 
     IEnumerator TryMatch(Item a, Item b)
     {
+        canPlay = false;
+
         yield return StartCoroutine(Swap(a, b)); // We do the swappingz
 
         MatchInfo matchA = GetMatch(a);
@@ -199,15 +203,17 @@ public class Board : MonoBehaviour
         if (matchA.valid)
         {
             yield return StartCoroutine(DestroyMatch(matchA.match));
+            yield return StartCoroutine(UpdateBoardIndices(matchA));
             yield return new WaitForSeconds(delayBetweenMatches);
-            // yield return StartCoroutine(UpdateBoardIndices(matchA));
         }
         else if (matchB.valid)
         {
             yield return StartCoroutine(DestroyMatch(matchB.match));
+            yield return StartCoroutine(UpdateBoardIndices(matchB));
             yield return new WaitForSeconds(delayBetweenMatches);
-            // yield return StartCoroutine(UpdateBoardIndices(matchB));
         }
+
+        canPlay = true;
     }
 
     IEnumerator Swap(Item a, Item b)
@@ -234,6 +240,54 @@ public class Board : MonoBehaviour
     {
         _items[x, y] = item;
         item.SetPosition(x, y);
+    }
+
+    IEnumerator UpdateBoardIndices(MatchInfo match)
+    {
+        int minX = match.GetMinX();
+        int maxX = match.GetMaxX();
+        int minY = match.GetMinY();
+        int maxY = match.GetMaxY();
+
+        if (minY == maxY) // We have to update several columns
+        {
+            for (int i = minX; i <= maxX; i++)
+            {
+                for (int j = minY; j < height - 1; j++)
+                {
+                    Item upperIndex = _items[i, j + 1];
+                    Item current = _items[i, j];
+                    _items[i, j] = upperIndex;
+                    _items[i, j + 1] = current;
+                    _items[i, j].SetPosition(_items[i, j].x, _items[i, j].y - 1);
+                }
+                _items[i, height - 1] = InstantiateDoddle(i, height - 1);
+            }
+        }
+        else if (minX == maxX) // We have to update one column
+        {
+            int matchHeight = (maxY - minY) + 1;
+            int currentX = minX;
+            for (int j = minY + matchHeight; j <= height - 1; j++)
+            {
+                Item lowerIndex = _items[currentX, j - matchHeight];
+                Item current = _items[currentX, j];
+                _items[currentX, j - matchHeight] = current;
+                _items[currentX, j] = lowerIndex;
+            }
+
+            for (int y = 0; y < height - matchHeight; y++)
+            {
+                _items[currentX, y].SetPosition(currentX, y);
+            }
+            for (int i = 0; i < match.Count; i++)
+            {
+                Debug.Log(string.Format("[{0}][{1}]", currentX, (height - 1) - i));
+                _items[currentX, (height - 1) - i] = InstantiateDoddle(currentX, (height - 1) - i);
+            }
+        }
+
+        yield return null;
     }
 
     void OnDisable()
