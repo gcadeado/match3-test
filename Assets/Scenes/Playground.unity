@@ -308,6 +308,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   height: 9
   width: 5
+  tileSwapTime: 0.2
+  delayBetweenMatches: 0.1
+  mininumMatchSize: 3
 --- !u!4 &558510913
 Transform:
   m_ObjectHideFlags: 0
