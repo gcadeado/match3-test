@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.Events;
 
 // ----------------------------------------------------------------------------
@@ -12,16 +13,23 @@ using UnityEngine.Events;
 
 public class GameEventListener : MonoBehaviour
 {
-    public GameEvent Event;
+    public List<GameEvent> events = new List<GameEvent>();
     public UnityEvent Response;
 
     private void OnEnable()
     {
-        Event.RegisterListener(this);
+        for (int i = events.Count - 1; i >= 0; i--)
+        {
+            events[i].RegisterListener(this);
+        }
+
     }
     private void OnDisable()
     {
-        Event.UnregisterListener(this);
+        for (int i = events.Count - 1; i >= 0; i--)
+        {
+            events[i].UnregisterListener(this);
+        }
     }
 
     public virtual void OnEventRaised()

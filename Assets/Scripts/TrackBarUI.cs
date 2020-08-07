@@ -16,9 +16,13 @@ public class TrackBarUI : GameEventListener
     public void UpdateBarValue()
     {
         RectTransform r = GetComponent<RectTransform>();
-        int value = ((IntVariable)Event).Value;
+        int score = ((IntVariable)events[0]).Value;
 
-        float scaleX = (float)value / 1000 > 1.0f ? 1.0f : (float)value / 1000;
+        int target = ((IntVariable)events[1]).Value;
+
+        float barProportion = (float)score / target;
+
+        float scaleX = barProportion > 1.0f ? 1.0f : barProportion;
         r.localScale = new Vector3(scaleX, 1f, 1f);
     }
 

@@ -14,6 +14,9 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private IntVariable scoreObject = null;
 
+    [SerializeField]
+    private IntVariable targetScoreObject = null;
+
     [Header("Gameplay times")]
     public float levelStartDelay = 2f;  //Time to wait before starting a new level, in seconds.
 
@@ -23,9 +26,9 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     [ReadOnly]
     private bool paused;
-    [SerializeField]
-    [ReadOnly]
-    private int targetScore = 0;
+    // [SerializeField]
+    // [ReadOnly]
+    // private int targetScore = 0;
     private float timeLeft = 0;
 
     private TMP_Text levelText = null;	//Text to display current level number.
@@ -58,6 +61,18 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public int targetScore
+    {
+        get
+        {
+            return targetScoreObject.Value;
+        }
+        set
+        {
+            targetScoreObject.Value = value;
+        }
+    }
+
     void Awake()
     {
         // Enforces singleton pattern
@@ -70,9 +85,6 @@ public class GameManager : MonoBehaviour
 
             Destroy(gameObject);
         }
-
-        // Increase current level
-        level = level + 1;
 
         //Get a component reference to the attached BoardManager script
         boardScript = GetComponent<BoardManager>();
@@ -90,6 +102,9 @@ public class GameManager : MonoBehaviour
         levelTargetText = GameObject.Find("LevelTarget").GetComponent<TMP_Text>();
         levelTimerText = GameObject.Find("LevelTimer").GetComponent<TMP_Text>();
         levelScoreBar = GameObject.Find("ScoreBarImage").GetComponent<RectTransform>();
+
+        // Increase current level
+        level = level + 1;
 
         // Show current round
         StartCoroutine(ShowLevelText("Round " + level, 2.0f));

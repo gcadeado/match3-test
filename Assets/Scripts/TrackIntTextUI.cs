@@ -21,7 +21,7 @@ public class TrackIntTextUI : GameEventListener
     public void UpdateTextValue()
     {
         TextMeshProUGUI textMeshPro = GetComponent<TextMeshProUGUI>();
-        int value = ((IntVariable)Event).Value;
+        int value = ((IntVariable)events[0]).Value;
 
         textMeshPro.text = preNumberText + value.ToString();
     }
