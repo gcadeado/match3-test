@@ -6,49 +6,74 @@ using TMPro;
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance = null;	//Static instance of GameManager which allows it to be accessed by any other script.
+    private BoardManager boardScript;  // Store a reference to our BoardManager which will set up the level.
 
+    [Header("Scriptable Objects Architecture")]
+    [SerializeField]
+    private IntVariable levelObject = null;
+    [SerializeField]
+    private IntVariable scoreObject = null;
+
+
+    [Header("Gameplay times")]
     public float levelStartDelay = 2f;  //Time to wait before starting a new level, in seconds.
 
     public float roundTime = 120f; // Round time, in seconds
 
-    private BoardManager boardScript;  // Store a reference to our BoardManager which will set up the level.
-    private int level = 1;  //  Current level number.
-
+    [Header("Game info")]
+    [SerializeField]
+    [ReadOnly]
     private bool paused;
-
+    [SerializeField]
+    [ReadOnly]
+    private int targetScore = 0;
     private float timeLeft = 0;
 
-    private int targetScore = 0;
-    private int levelScore = 0;
+    private TMP_Text levelText = null;	//Text to display current level number.
+    private TMP_Text levelTargetText = null; //Text to display current level target score.
+    private TMP_Text levelScoreText = null;	//Text to display current score.
+    private RectTransform levelScoreBar = null; // Bar to track level score
+    private TMP_Text levelTimerText = null; //Text to display current score.
 
-    [SerializeField]
-    private TMP_Text levelText;	//Text to display current level number.
-    [SerializeField]
-    private TMP_Text levelTargetText; //Text to display current level target score.
-    [SerializeField]
-    private TMP_Text levelScoreText;	//Text to display current score.
-    [SerializeField]
-    private RectTransform levelScoreBar; // Bar to track level score
-    [SerializeField]
-    private TMP_Text levelTimerText;	//Text to display current score.
+    public int levelScore
+    {
+        get
+        {
+            return scoreObject.Value;
+        }
+        set
+        {
+            scoreObject.Value = value;
+        }
+    }
 
-    //Awake is always called before any Start functions
+    public int level
+    {
+        get
+        {
+            return levelObject.Value;
+        }
+        set
+        {
+            levelObject.Value = value;
+        }
+    }
+
     void Awake()
     {
-        //Check if instance already exists
+        // Enforces singleton pattern
         if (instance == null)
-
-            //if not, set instance to this
+        {
             instance = this;
-
-        //If instance already exists and it's not this:
+        }
         else if (instance != this)
+        {
 
-            //Then destroy this. This enforces our singleton pattern, meaning there can only ever be one instance of a GameManager.
             Destroy(gameObject);
+        }
 
-        //Sets this to not be destroyed when reloading scene
-        DontDestroyOnLoad(gameObject);
+        // Increase current level
+        level = level + 1;
 
         //Get a component reference to the attached BoardManager script
         boardScript = GetComponent<BoardManager>();
@@ -57,26 +82,16 @@ public class GameManager : MonoBehaviour
         InitGame();
     }
 
-    // This is called only once, and the paramter tell it to be called only after the scene was loaded
-    // (otherwise, our Scene Load callback would be called the very first load, and we don't want that)
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-    static public void CallbackInitialization()
-    {
-        //register the callback to be called everytime the scene is loaded
-        SceneManager.sceneLoaded += OnSceneLoaded;
-    }
-
-    //This is called each time a scene is loaded.
-    static private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
-    {
-        instance.level++;
-
-        instance.InitGame();
-    }
-
     //Initializes the game for each level.
     void InitGame()
     {
+        //Get references to our UI text component by finding it by name and calling GetComponent.
+        levelText = GameObject.Find("LevelText").GetComponent<TMP_Text>();
+        levelScoreText = GameObject.Find("LevelScore").GetComponent<TMP_Text>();
+        levelTargetText = GameObject.Find("LevelTarget").GetComponent<TMP_Text>();
+        levelTimerText = GameObject.Find("LevelTimer").GetComponent<TMP_Text>();
+        levelScoreBar = GameObject.Find("ScoreBarImage").GetComponent<RectTransform>();
+
         // Show current round
         StartCoroutine(ShowLevelText("Round " + level, 2.0f));
 
@@ -141,6 +156,20 @@ public class GameManager : MonoBehaviour
         {
             GameOver();
         }
+
+        if (levelScore >= targetScore)
+        {
+            StartCoroutine(ShowLevelText("OK", levelStartDelay));
+            Invoke("RestartScene", levelStartDelay);
+        }
+    }
+
+    private void RestartScene()
+    {
+        // Load the last scene loaded, in this case Main, the only scene in the game. 
+        // And we load it in "Single" mode so it replace the existing one
+        // and not load all the scene object in the current scene.
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex, LoadSceneMode.Single);
     }
 
     //GameOver is called when the timer reaches 0
@@ -149,7 +178,7 @@ public class GameManager : MonoBehaviour
         // Show game over
         StartCoroutine(ShowLevelText("Time's up!\nGame Over", 5.0f));
 
-        //Disable this GameManager.
+        // Disable this GameManager.
         enabled = false;
     }
 }

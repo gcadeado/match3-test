@@ -9,6 +9,8 @@ public class BoardManager : MonoBehaviour
 
     public int minMatch = 3; // Minimum items in line to be a valid match
 
+    public int itemScore = 60;
+
     public float itemSwapTime = 0.1f;
     public float delayBetweenMatches = 0.2f;
 
@@ -25,7 +27,12 @@ public class BoardManager : MonoBehaviour
 
     private Item _selectedItem; // Player's current selected item
 
-    public bool canPlay = true;
+    [SerializeField]
+    [ReadOnly]
+    private bool canPlay = true;
+
+    [SerializeField]
+    private IntVariable scoreObject = null; // Reference to score Scriptable Object
 
     void BoardSetup()
     {
@@ -242,7 +249,7 @@ public class BoardManager : MonoBehaviour
         if (!matchA.valid && !matchB.valid)
         {
             // Swap not resulted in a valid match, undo swap
-            Debug.Log("Swap not valid");
+            Debug.Log("This swap is not a valid match.");
             SwapIndices(a, b);
             yield return StartCoroutine(Swap(a, b));
             canPlay = true;
@@ -251,6 +258,7 @@ public class BoardManager : MonoBehaviour
 
         if (matchA.valid)
         {
+            AddScore(matchA.match.Count);
             StartCoroutine(DestroyMatch(matchA.match));
             yield return StartCoroutine(UpdateBoardIndices(matchA));
             DestroyMatchObjects(matchA.match);
@@ -258,6 +266,7 @@ public class BoardManager : MonoBehaviour
         }
         else if (matchB.valid)
         {
+            AddScore(matchB.match.Count);
             StartCoroutine(DestroyMatch(matchB.match));
             yield return StartCoroutine(UpdateBoardIndices(matchB));
             DestroyMatchObjects(matchB.match);
@@ -299,6 +308,11 @@ public class BoardManager : MonoBehaviour
         {
             Destroy(item.gameObject);
         }
+    }
+
+    void AddScore(int matchSize)
+    {
+        scoreObject.Value += matchSize * itemScore;
     }
 
     void UpdateItemPositions(Item item, int x, int y)
@@ -364,7 +378,7 @@ public class BoardManager : MonoBehaviour
         CheckForMatches();
         if (!CheckForPossibleMoves())
         {
-            Debug.Log("Should shuffle board");
+            Debug.Log("No more possible moves. Shuffling board.");
             ShuffleBoard(new System.Random());
         };
 
@@ -386,9 +400,7 @@ public class BoardManager : MonoBehaviour
             {
                 hasFallingItems = hasFallingItems || item.isFalling;
             }
-            Debug.Log(hasFallingItems);
         }
-        Debug.Log("Finished falling");
         yield return null;
     }
 
@@ -403,6 +415,7 @@ public class BoardManager : MonoBehaviour
                 MatchInfo matchInfo = GetMatch(_items[x, y]);
                 if (matchInfo.valid)
                 {
+                    AddScore(matchInfo.match.Count);
                     StartCoroutine(DestroyMatch(matchInfo.match));
                     yield return StartCoroutine(UpdateBoardIndices(matchInfo));
                     DestroyMatchObjects(matchInfo.match);
@@ -415,9 +428,10 @@ public class BoardManager : MonoBehaviour
 
     bool CheckForPossibleMoves()
     {
+
         MatchInfo matchA;
         MatchInfo matchB;
-        List<List<Item>> possibleSwaps = new List<List<Item>>();
+        List<List<Item>> possibleSwaps = new List<List<Item>>(); // TODO: Saving and return the first swap that gives a match for later reuse (hint for moves)
         for (int x = 0; x < width - 1; x++)
         {
             //Loop along y axis
@@ -446,7 +460,7 @@ public class BoardManager : MonoBehaviour
                 SwapIndices(current, upperItem); // Swap back as we dont want the actual swap
             }
         }
-        Debug.Log(possibleSwaps.Count);
+        Debug.Log("Possible moves left: " + possibleSwaps.Count);
         return possibleSwaps.Count > 0;
     }
     void OnDisable()
