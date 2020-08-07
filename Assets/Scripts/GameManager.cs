@@ -1,11 +1,11 @@
-﻿using System.Collections;
+﻿
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
 
-public class GameManager : MonoBehaviour
+public class GameManager : Singleton<GameManager>
 {
-    public static GameManager instance = null;	//Static instance of GameManager which allows it to be accessed by any other script.
     private BoardManager boardScript;  // Store a reference to our BoardManager which will set up the level.
 
     [Header("Scriptable Objects Architecture")]
@@ -20,6 +20,10 @@ public class GameManager : MonoBehaviour
     public float levelStartDelay = 2f;  //Time to wait before starting a new level, in seconds.
 
     public float roundTime = 120f; // Round time, in seconds
+
+    [Header("Level stuff")]
+    [SerializeField]
+    private string[] passedPhrases = { "Passed" };  // Phrases to show when round is done
 
     [Header("Game info")]
     [SerializeField]
@@ -71,17 +75,6 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
-        // Enforces singleton pattern
-        if (instance == null)
-        {
-            instance = this;
-        }
-        else if (instance != this)
-        {
-
-            Destroy(gameObject);
-        }
-
         // Increase current level
         level = level + 1;
 
@@ -103,7 +96,7 @@ public class GameManager : MonoBehaviour
         levelScoreBar = GameObject.Find("ScoreBarImage").GetComponent<RectTransform>();
 
         // Show current round
-        StartCoroutine(ShowLevelText("Round " + level, 2.0f));
+        ShowLevelText("Round " + level, 2.0f);
 
         // Reset score
         levelScore = 0;
@@ -131,7 +124,7 @@ public class GameManager : MonoBehaviour
 
     }
 
-    IEnumerator ShowLevelText(string text, float duration, bool pause = true)
+    private void ShowLevelText(string text, float duration, bool pause = true)
     {
         if (pause)
         {
@@ -143,8 +136,13 @@ public class GameManager : MonoBehaviour
         // TODO create a nice animation to text level
         levelText.enabled = true;
 
-        yield return new WaitForSeconds(duration);
+        // yield return new WaitForSecondsRealtime(duration);
+        Invoke("HideLevelText", duration);
 
+    }
+
+    private void HideLevelText()
+    {
         levelText.enabled = false;
 
         paused = false;
@@ -169,7 +167,8 @@ public class GameManager : MonoBehaviour
 
         if (levelScore >= targetScore)
         {
-            StartCoroutine(ShowLevelText("OK", levelStartDelay));
+            string passedText = passedPhrases[Random.Range(0, passedPhrases.Length)];
+            ShowLevelText(passedText, levelStartDelay);
             Invoke("RestartScene", levelStartDelay);
         }
     }
@@ -186,7 +185,7 @@ public class GameManager : MonoBehaviour
     public void GameOver()
     {
         // Show game over
-        StartCoroutine(ShowLevelText("Time's up!\nGame Over", 5.0f));
+        ShowLevelText("Time's up!\nGame Over", 5.0f);
 
         // Disable this GameManager.
         enabled = false;

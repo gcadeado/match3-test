@@ -30,9 +30,12 @@ public class TrackBarUI : GameEventListener
 
     public void UpdateBarValue()
     {
+        if (maxSize == 0)
+        {
+            return;
+        }
         RectTransform r = GetComponent<RectTransform>();
         int value = ((IntVariable)Event).Value;
-
         float sizeProportion = (float)value / maxSize;
         float scaleX = sizeProportion > 1.0f ? 1.0f : sizeProportion;
         r.localScale = new Vector3(scaleX, 1f, 1f);

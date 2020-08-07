@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BoardManager : MonoBehaviour
+public class BoardManager : Singleton<BoardManager>
 {
     public int height = 5; // Board height
     public int width = 5; // Board width
@@ -34,8 +34,26 @@ public class BoardManager : MonoBehaviour
     [SerializeField]
     private IntVariable scoreObject = null; // Reference to score Scriptable Object
 
+
+    private AudioSourcePlayer audioPlayer = null;
+
+    [Header("Audio")]
+    [SerializeField]
+    private AudioManager audioManager = null;
+
+    [SerializeField]
+    private Sound clearSFX = null;
+
+    [SerializeField]
+    private Sound selectSFX = null;
+
+    [SerializeField]
+    private Sound swapSFX = null;
+
     void BoardSetup()
     {
+
+        audioPlayer = AudioSourcePlayer.AddAsComponent(gameObject, audioManager);
 
         //Instantiate Board and set boardHolder to its transform.
         boardHolder = new GameObject("Board").transform;
@@ -213,11 +231,13 @@ public class BoardManager : MonoBehaviour
         if (_selectedItem == item || !canPlay)
         {
             _selectedItem = null;
+            audioPlayer.PlaySound(selectSFX);
             return;
         }
         if (_selectedItem == null)
         {
             _selectedItem = item;
+            audioPlayer.PlaySound(selectSFX);
         }
         else
         {
@@ -242,6 +262,7 @@ public class BoardManager : MonoBehaviour
 
         SwapIndices(a, b);
         yield return StartCoroutine(Swap(a, b));
+        audioPlayer.PlaySound(swapSFX);
 
         MatchInfo matchA = GetMatch(a);
         MatchInfo matchB = GetMatch(b);
@@ -299,6 +320,7 @@ public class BoardManager : MonoBehaviour
         {
             StartCoroutine(item.transform.Scale(Vector3.zero, 0.1f));
         }
+        audioPlayer.PlaySound(clearSFX);
         yield return null;
     }
 
