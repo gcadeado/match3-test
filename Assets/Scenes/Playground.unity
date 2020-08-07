@@ -409,6 +409,12 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 05ae91427c69191458853681ee7f06f9,
         type: 2}
+    - target: {fileID: 3212795778593033176, guid: 5a12f3df0c3531f4fb0033932a149344,
+        type: 3}
+      propertyPath: levelObject
+      value: 
+      objectReference: {fileID: 11400000, guid: 62c695e4ee015de4cb8cc79622de0ced,
+        type: 2}
     - target: {fileID: 3212795778593033177, guid: 5a12f3df0c3531f4fb0033932a149344,
         type: 3}
       propertyPath: scoreObject
@@ -484,6 +490,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 7537490340585631568, guid: 8a6c7d80e5af03946b3843288a6ba43f,
+        type: 3}
+      propertyPath: m_Name
+      value: LevelTarget
+      objectReference: {fileID: 0}
     - target: {fileID: 7537490340585631569, guid: 8a6c7d80e5af03946b3843288a6ba43f,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -514,6 +525,11 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7537490340822811600, guid: 8a6c7d80e5af03946b3843288a6ba43f,
+        type: 3}
+      propertyPath: m_Name
+      value: LevelScore
+      objectReference: {fileID: 0}
     - target: {fileID: 7537490341785996304, guid: 8a6c7d80e5af03946b3843288a6ba43f,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -543,6 +559,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_SizeDelta.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7537490341993835718, guid: 8a6c7d80e5af03946b3843288a6ba43f,
+        type: 3}
+      propertyPath: m_Name
+      value: ScoreBarImage
+      objectReference: {fileID: 0}
+    - target: {fileID: 7537490341997589214, guid: 8a6c7d80e5af03946b3843288a6ba43f,
+        type: 3}
+      propertyPath: m_Name
+      value: LevelText
       objectReference: {fileID: 0}
     - target: {fileID: 7537490341997589215, guid: 8a6c7d80e5af03946b3843288a6ba43f,
         type: 3}
@@ -683,6 +709,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: UI
+      objectReference: {fileID: 0}
+    - target: {fileID: 7537490342321010670, guid: 8a6c7d80e5af03946b3843288a6ba43f,
+        type: 3}
+      propertyPath: m_Name
+      value: LevelTimer
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8a6c7d80e5af03946b3843288a6ba43f, type: 3}

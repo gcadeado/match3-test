@@ -167,6 +167,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7537490340822811601}
   - component: {fileID: 7537490340822811615}
+  - component: {fileID: 8718511223884439481}
   - component: {fileID: 7537490340822811614}
   m_Layer: 5
   m_Name: Level Score
@@ -202,6 +203,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7537490340822811600}
   m_CullTransparentMesh: 0
+--- !u!114 &8718511223884439481
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7537490340822811600}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ac285e4bd9f348439964114377c15fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Event: {fileID: 11400000, guid: 05ae91427c69191458853681ee7f06f9, type: 2}
+  Response:
+    m_PersistentCalls:
+      m_Calls: []
+  preNumberText: 
 --- !u!114 &7537490340822811614
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -221,7 +239,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 999999
+  m_text: 0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 0b11028c62d5ccc42a495f00ba1258f4, type: 2}
   m_sharedMaterial: {fileID: -12629669370051255, guid: 0b11028c62d5ccc42a495f00ba1258f4,
@@ -291,7 +309,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_textInfo:
     textComponent: {fileID: 7537490340822811614}
-    characterCount: 6
+    characterCount: 1
     spriteCount: 0
     spaceCount: 0
     wordCount: 1
@@ -811,6 +829,7 @@ GameObject:
   - component: {fileID: 7537490341993835719}
   - component: {fileID: 7537490341993835717}
   - component: {fileID: 7537490341993835716}
+  - component: {fileID: 7351598373808336460}
   m_Layer: 5
   m_Name: Score Bar
   m_TagString: Untagged
@@ -827,7 +846,7 @@ RectTransform:
   m_GameObject: {fileID: 7537490341993835718}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.5, y: 1, z: 1}
+  m_LocalScale: {x: 0, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 7537490341339447333}
   m_RootOrder: 0
@@ -874,6 +893,22 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &7351598373808336460
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7537490341993835718}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41ba8706db7aa0b4cb2def9a72349dd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Event: {fileID: 11400000, guid: 05ae91427c69191458853681ee7f06f9, type: 2}
+  Response:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &7537490341997589214
 GameObject:
   m_ObjectHideFlags: 0

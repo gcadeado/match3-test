@@ -1,6 +1,6 @@
 ﻿using System.Collections;
-using UnityEngine.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 public class GameManager : MonoBehaviour
@@ -13,7 +13,6 @@ public class GameManager : MonoBehaviour
     private IntVariable levelObject = null;
     [SerializeField]
     private IntVariable scoreObject = null;
-
 
     [Header("Gameplay times")]
     public float levelStartDelay = 2f;  //Time to wait before starting a new level, in seconds.
