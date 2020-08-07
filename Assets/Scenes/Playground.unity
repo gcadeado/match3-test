@@ -682,6 +682,16 @@ PrefabInstance:
       propertyPath: m_LocalScale.x
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7537490341997589212, guid: 8a6c7d80e5af03946b3843288a6ba43f,
+        type: 3}
+      propertyPath: m_fontSize
+      value: 63.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 7537490341997589212, guid: 8a6c7d80e5af03946b3843288a6ba43f,
+        type: 3}
+      propertyPath: m_fontSizeMax
+      value: 64
+      objectReference: {fileID: 0}
     - target: {fileID: 7537490341997589214, guid: 8a6c7d80e5af03946b3843288a6ba43f,
         type: 3}
       propertyPath: m_Name

@@ -231,12 +231,14 @@ public class BoardManager : Singleton<BoardManager>
         if (_selectedItem == item || !canPlay)
         {
             _selectedItem = null;
+            SetSelectItems(false, item);
             audioPlayer.PlaySound(selectSFX);
             return;
         }
         if (_selectedItem == null)
         {
             _selectedItem = item;
+            SetSelectItems(true, item);
             audioPlayer.PlaySound(selectSFX);
         }
         else
@@ -253,16 +255,17 @@ public class BoardManager : Singleton<BoardManager>
                 Debug.Log("This move is forbidden.");
             }
             _selectedItem = null;
+            SetSelectItems(false, item);
         }
     }
 
     IEnumerator TryMatch(Item a, Item b)
     {
         canPlay = false;
+        audioPlayer.PlaySound(swapSFX);
 
         SwapIndices(a, b);
         yield return StartCoroutine(Swap(a, b));
-        audioPlayer.PlaySound(swapSFX);
 
         MatchInfo matchA = GetMatch(a);
         MatchInfo matchB = GetMatch(b);
@@ -271,6 +274,7 @@ public class BoardManager : Singleton<BoardManager>
         {
             // Swap not resulted in a valid match, undo swap
             Debug.Log("This swap is not a valid match.");
+            SetSelectItems(false, a, b);
             SwapIndices(a, b);
             yield return StartCoroutine(Swap(a, b));
             canPlay = true;
@@ -280,6 +284,7 @@ public class BoardManager : Singleton<BoardManager>
         if (matchA.valid)
         {
             AddScore(matchA.match.Count);
+            SetSelectItems(false, a, b);
             StartCoroutine(DestroyMatch(matchA.match));
             yield return StartCoroutine(UpdateBoardIndices(matchA));
             DestroyMatchObjects(matchA.match);
@@ -288,6 +293,7 @@ public class BoardManager : Singleton<BoardManager>
         else if (matchB.valid)
         {
             AddScore(matchB.match.Count);
+            SetSelectItems(false, a, b);
             StartCoroutine(DestroyMatch(matchB.match));
             yield return StartCoroutine(UpdateBoardIndices(matchB));
             DestroyMatchObjects(matchB.match);
@@ -312,6 +318,14 @@ public class BoardManager : Singleton<BoardManager>
         StartCoroutine(a.transform.Move(b.transform.position, itemSwapTime));
         StartCoroutine(b.transform.Move(a.transform.position, itemSwapTime));
         yield return new WaitForSeconds(itemSwapTime);
+    }
+
+    void SetSelectItems(bool selected = true, params Item[] items)
+    {
+        for (int i = 0; i < items.Length; i++)
+        {
+            items[i].SetSelected(selected);
+        }
     }
 
     IEnumerator DestroyMatch(List<Item> items)

@@ -24,11 +24,37 @@ public class Item : MonoBehaviour
         set;
     }
 
+    public Color defaultColor = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+    public Color selectedColor = new Color(0.7f, 0.7f, 0.7f, 0.9f);
+
+    SpriteRenderer sp;
+
+    void Start()
+    {
+        //Fetch the SpriteRenderer from the GameObject
+        sp = GetComponent<SpriteRenderer>();
+        //Set the GameObject's Color quickly to a set Color (blue)
+        sp.color = defaultColor;
+    }
+
+
     public void SetPosition(int newX, int newY)
     {
         x = newX;
         y = newY;
         gameObject.name = string.Format("[{0}][{1}]", x, y);
+    }
+
+    public void SetSelected(bool selected)
+    {
+        if (selected)
+        {
+            sp.color = selectedColor;
+        }
+        else
+        {
+            sp.color = defaultColor;
+        }
     }
 
     public IEnumerator Fall(Vector3 target, float gravity)
