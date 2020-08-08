@@ -44,13 +44,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d49f88ae9efbe6846b042f48dd26ea26, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _persistent: 0
   height: 8
   width: 5
   minMatch: 3
+  itemScore: 60
   itemSwapTime: 0.1
   delayBetweenMatches: 0.2
   gravity: 9.8
   canPlay: 1
+  scoreObject: {fileID: 11400000, guid: 05ae91427c69191458853681ee7f06f9, type: 2}
+  audioManager: {fileID: 11400000, guid: e77250b736fcb8648a7f8cdd178df76a, type: 2}
+  clearSFX: {fileID: 11400000, guid: 69b02672eb1aed242aa4e43da179bf69, type: 2}
+  selectSFX: {fileID: 11400000, guid: 7821bcb5d99a1cd4b95f2f69327b8804, type: 2}
+  swapSFX: {fileID: 11400000, guid: c1f77f4fef1f59f499135668b7aea601, type: 2}
 --- !u!114 &3212795778593033176
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -63,10 +70,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87230ec8c2d999b4a99e520e7e9190e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _persistent: 0
+  levelObject: {fileID: 11400000, guid: 62c695e4ee015de4cb8cc79622de0ced, type: 2}
+  scoreObject: {fileID: 11400000, guid: 05ae91427c69191458853681ee7f06f9, type: 2}
+  targetScoreObject: {fileID: 11400000, guid: 4575c8dc1c4b44744b636b6e360b1b29, type: 2}
   levelStartDelay: 2
   roundTime: 120
-  levelText: {fileID: 0}
-  levelTargetText: {fileID: 0}
-  levelScoreText: {fileID: 0}
-  levelScoreBar: {fileID: 0}
-  levelTimerText: {fileID: 0}
+  passedPhrases:
+  - Passed!
+  - Nice!
+  - Superb!
+  - Great!
+  - Divine!
+  - Fantastic!
+  paused: 0

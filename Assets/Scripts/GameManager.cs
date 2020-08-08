@@ -1,4 +1,5 @@
 ﻿
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -170,7 +171,7 @@ public class GameManager : Singleton<GameManager>
 
     private void RestartScene()
     {
-        // Load the last scene loaded, in this case Main, the only scene in the game. 
+        // Load the last scene loaded, in this case Playground, the only scene in the game. 
         // And we load it in "Single" mode so it replace the existing one
         // and not load all the scene object in the current scene.
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex, LoadSceneMode.Single);
@@ -181,8 +182,12 @@ public class GameManager : Singleton<GameManager>
     {
         // Show game over
         ShowLevelText("Time's up!\nGame Over", 5.0f);
+        level = 0; // Reset level variable
+        Invoke("BackToMenu", 2.0f); // Go back to menu
+    }
 
-        // Disable this GameManager.
-        enabled = false;
+    void BackToMenu()
+    {
+        SceneManager.LoadScene("Menu");
     }
 }
