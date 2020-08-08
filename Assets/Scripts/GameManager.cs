@@ -32,7 +32,6 @@ public class GameManager : Singleton<GameManager>
     private float timeLeft = 0;
 
     private TMP_Text levelText = null;	//Text to display current level number.
-    private TMP_Text levelTargetText = null; //Text to display current level target score.
     private TMP_Text levelScoreText = null;	//Text to display current score.
     private RectTransform levelScoreBar = null; // Bar to track level score
     private TMP_Text levelTimerText = null; //Text to display current score.
@@ -91,7 +90,6 @@ public class GameManager : Singleton<GameManager>
         //Get references to our UI text component by finding it by name and calling GetComponent.
         levelText = GameObject.Find("LevelText").GetComponent<TMP_Text>();
         levelScoreText = GameObject.Find("LevelScore").GetComponent<TMP_Text>();
-        levelTargetText = GameObject.Find("LevelTarget").GetComponent<TMP_Text>();
         levelTimerText = GameObject.Find("LevelTimer").GetComponent<TMP_Text>();
         levelScoreBar = GameObject.Find("ScoreBarImage").GetComponent<RectTransform>();
 
@@ -109,9 +107,6 @@ public class GameManager : Singleton<GameManager>
 
         // Set level target score using a simple formula
         targetScore = (int)(level * 1000f);
-
-        //Set the text of levelTarget
-        levelTargetText.text = targetScore.ToString();
 
         //Call the Init function of the BoardManager script.
         boardScript.Init();

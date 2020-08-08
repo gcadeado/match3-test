@@ -4,25 +4,13 @@ using UnityEditor;
 
 public class Item : MonoBehaviour
 {
-    public int x
-    {
-        get;
-        set;
-    }
+    public int x; // Horizontal position
 
-    public int y
-    {
-        get;
-        set;
-    }
+    public int y; // Vertical position
 
     public int id;
 
-    public bool isFalling
-    {
-        get;
-        set;
-    }
+    public bool isFalling; // Referece to check if object is falling
 
     public Color defaultColor = new Color(1.0f, 1.0f, 1.0f, 1.0f);
     public Color selectedColor = new Color(0.7f, 0.7f, 0.7f, 0.9f);
@@ -33,6 +21,7 @@ public class Item : MonoBehaviour
     {
         //Fetch the SpriteRenderer from the GameObject
         sp = GetComponent<SpriteRenderer>();
+
         //Set the GameObject's Color quickly to a set Color (blue)
         sp.color = defaultColor;
     }
@@ -40,8 +29,11 @@ public class Item : MonoBehaviour
 
     public void SetPosition(int newX, int newY)
     {
+        // Set new position
         x = newX;
         y = newY;
+
+        // Set object name
         gameObject.name = string.Format("[{0}][{1}]", x, y);
     }
 
@@ -84,10 +76,13 @@ public class Item : MonoBehaviour
         }
     }
 
+#if UNITY_EDITOR
     void OnDrawGizmos()
     {
+        // Draw object position and ID on screen
         Handles.Label(transform.position, string.Format("[{0}][{1}]\nID: {2}", x, y, id));
     }
+#endif
 
     public delegate void OnMouseOverItem(Item item);
     public static event OnMouseOverItem OnMouseOverItemEventHandler;
