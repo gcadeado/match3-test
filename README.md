@@ -1,6 +1,8 @@
 # match3-test
 
-![Image description](https://raw.githubusercontent.com/PlayKids/match3-test/master/ComboGif.gif?token=ACIXP4Y4NCTOIHSWPRWIE3C65JSLU)
+![Gameplay footage](https://user-images.githubusercontent.com/1725075/89704704-b6fc5500-d92c-11ea-8c02-6aee59d17d8a.gif)
+
+This is a complete game for an admission test. Feel free to use and support.
 
 **Game concept**
 
@@ -15,3 +17,10 @@ Everytime the player scores, the gems need to be moved down and freeing up place
 - Game must have sound and make use of the sprites of this repository. 
 - The game must be implemented in Portrait orientation, and the game board and UI must works in differenct resolutions and aspect ratios.
 - Delivery: the project must be uploaded into a github repository
+
+**Features**
+
+- Scriptable Objects based architecture
+- Simple physics mechanics
+- TextMesh fonts assets
+- Some tooling scripts for better development workflow
