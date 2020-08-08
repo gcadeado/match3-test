@@ -243,9 +243,11 @@ public class BoardManager : Singleton<BoardManager>
         }
         else
         {
-            float xDiff = Mathf.Abs(item.x - _selectedItem.x);
-            float yDiff = Mathf.Abs(item.y - _selectedItem.y);
-            if (Mathf.Abs(xDiff - yDiff) == 1)
+            Vector3 itemPos = new Vector3(item.x, item.y, 0);
+            Vector3 selectedPos = new Vector3(_selectedItem.x, _selectedItem.y, 0);
+
+            // Check if selected is in permited radius (the neighbors always has distance 1)
+            if ((itemPos - selectedPos).magnitude == 1)
             {
                 // Try to swap items
                 StartCoroutine(TryMatch(_selectedItem, item));
@@ -254,8 +256,8 @@ public class BoardManager : Singleton<BoardManager>
             {
                 Debug.Log("This move is forbidden.");
             }
+            SetSelectItems(false, item, _selectedItem);
             _selectedItem = null;
-            SetSelectItems(false, item);
         }
     }
 
