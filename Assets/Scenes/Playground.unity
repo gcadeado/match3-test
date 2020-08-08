@@ -522,6 +522,18 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7537490341997589212, guid: 8a6c7d80e5af03946b3843288a6ba43f,
+        type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 5b5fb9c98c72b9b4da45190aee0c64c4,
+        type: 2}
+    - target: {fileID: 7537490341997589212, guid: 8a6c7d80e5af03946b3843288a6ba43f,
+        type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 1663235418822550629, guid: 5b5fb9c98c72b9b4da45190aee0c64c4,
+        type: 2}
     - target: {fileID: 7537490341997589215, guid: 8a6c7d80e5af03946b3843288a6ba43f,
         type: 3}
       propertyPath: m_AnchorMin.y
