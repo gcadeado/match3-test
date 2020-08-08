@@ -17,14 +17,13 @@ public class GameManager : Singleton<GameManager>
     [SerializeField]
     private IntVariable targetScoreObject = null;
 
-    [Header("Gameplay times")]
+    [Header("Game settings")]
+    [SerializeField]
+    private string[] passedPhrases = { "Passed" };  // Phrases to show when round is done
+
     public float levelStartDelay = 2f;  //Time to wait before starting a new level, in seconds.
 
     public float roundTime = 120f; // Round time, in seconds
-
-    [Header("Level stuff")]
-    [SerializeField]
-    private string[] passedPhrases = { "Passed" };  // Phrases to show when round is done
 
     [Header("Game info")]
     [SerializeField]
@@ -125,6 +124,7 @@ public class GameManager : Singleton<GameManager>
         if (pause)
         {
             paused = true;
+            boardScript.canPlay = false;
         }
         //Set the text of levelText to the string "Level" and append the current level number.
         levelText.text = text;
@@ -142,6 +142,7 @@ public class GameManager : Singleton<GameManager>
         levelText.enabled = false;
 
         paused = false;
+        boardScript.canPlay = true;
     }
 
     //Update is called every frame.
@@ -163,6 +164,7 @@ public class GameManager : Singleton<GameManager>
 
         if (levelScore >= targetScore)
         {
+            boardScript.canPlay = false;
             string passedText = passedPhrases[Random.Range(0, passedPhrases.Length)];
             ShowLevelText(passedText, levelStartDelay);
             Invoke("RestartScene", levelStartDelay);
@@ -180,8 +182,7 @@ public class GameManager : Singleton<GameManager>
     //GameOver is called when the timer reaches 0
     public void GameOver()
     {
-        // Show game over
-        ShowLevelText("Time's up!\nGame Over", 5.0f);
+        ShowLevelText("Time's up!\nGame Over", 5.0f); // Show game over
         level = 0; // Reset level variable
         Invoke("BackToMenu", 2.0f); // Go back to menu
     }

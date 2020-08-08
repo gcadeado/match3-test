@@ -4,38 +4,31 @@ using UnityEngine;
 
 public class BoardManager : Singleton<BoardManager>
 {
+    private GameObject[] _tiles; // Reference for loading our tile prefabs
+    private Item[,] _items; // Reference to store which item is on each board position
+    private Transform boardHolder; // Reference to the transform of our Board object
+    private Item _selectedItem; // Player's current selected item
+
+    [Header("Board settings")]
     public int height = 5; // Board height
     public int width = 5; // Board width
 
-    public int minMatch = 3; // Minimum items in line to be a valid match
+    [Tooltip("Minimum items for a valid match")]
+    public int minMatch = 3;
 
+    [Tooltip("Score value for each item in a match")]
     public int itemScore = 60;
 
-    public float itemSwapTime = 0.1f;
-    public float delayBetweenMatches = 0.2f;
+    public float itemSwapTime = 0.1f; // Time to swap items animation
+
+    public float delayBetweenMatches = 0.2f; // Wait time after a match
 
     public float gravity = 9.8f;
 
-    // Reference for loading our tile prefabs
-    private GameObject[] _tiles;
-
-    // Reference to store which item is on each board position
-    private Item[,] _items;
-
-    // Store a reference to the transform of our Board object.
-    private Transform boardHolder;
-
-    private Item _selectedItem; // Player's current selected item
-
-    [SerializeField]
-    [ReadOnly]
-    private bool canPlay = true;
+    [Header("Scriptable Objects Architecture")]
 
     [SerializeField]
     private IntVariable scoreObject = null; // Reference to score Scriptable Object
-
-
-    private AudioSourcePlayer audioPlayer = null;
 
     [Header("Audio")]
     [SerializeField]
@@ -50,6 +43,14 @@ public class BoardManager : Singleton<BoardManager>
     [SerializeField]
     private Sound swapSFX = null;
 
+    private AudioSourcePlayer audioPlayer = null;
+
+    [Header("Info")]
+
+    [ReadOnly]
+    public bool canPlay = true; // Setup board and instantiate items
+
+    // Setup board and instantiate items
     void BoardSetup()
     {
 
@@ -110,8 +111,7 @@ public class BoardManager : Singleton<BoardManager>
             _items[row_i, col_i] = _items[row_j, col_j];
             _items[row_j, col_j] = temp;
             SwapIndices(_items[row_i, col_i], _items[row_j, col_j]);
-            RepositionItems();
-            // Swap(_items[row_i, col_i], _items[row_j, col_j]);
+            RepositionItems(); // Reposition all items gameObject positions with the new ones
         }
     }
 
@@ -143,6 +143,8 @@ public class BoardManager : Singleton<BoardManager>
         Debug.Log(string.Format("Loaded {0} objects", _tiles.Length));
     }
 
+
+    // Clean initial matches as we don't want matches on round start
     void SweepBoard()
     {
         for (int i = 0; i < width; i++)
@@ -163,9 +165,9 @@ public class BoardManager : Singleton<BoardManager>
 
     public void Init()
     {
-        LoadTiles(); // TODO make this a global referenced Scriptable Object
-        BoardSetup();
-        SweepBoard();
+        LoadTiles(); // Load tile resources prefabs
+        BoardSetup(); // Setup item array and intantiate doddles
+        SweepBoard(); // Remove possible matches at round start
 
         // Register a callback to be called everytime player selects an item
         Item.OnMouseOverItemEventHandler += OnMouseOverItem;
@@ -190,16 +192,20 @@ public class BoardManager : Singleton<BoardManager>
         return m;
     }
 
+    // Get horizontal matched items
     List<Item> GetMatchHorizontal(Item item)
     {
-        List<Item> matched = new List<Item> { item };
+        List<Item> matched = new List<Item> { item }; // List for matched items
         int leftItem = item.x - 1;  // Imediatelly left item
         int rightItem = item.x + 1; // Imediatelly right item
+
+        // Starting from the swapped item, we search recursively for the left items with same id until we found a different item
         while (leftItem >= 0 && _items[leftItem, item.y].id == item.id)
         {
-            matched.Add(_items[leftItem, item.y]);
+            matched.Add(_items[leftItem, item.y]); // Add matched item to the list
             leftItem--;
         }
+        // Same logic for right items
         while (rightItem < width && _items[rightItem, item.y].id == item.id)
         {
             matched.Add(_items[rightItem, item.y]);
@@ -208,16 +214,20 @@ public class BoardManager : Singleton<BoardManager>
         return matched;
     }
 
+    // Get horizontal matched items
     List<Item> GetMatchVertical(Item item)
     {
-        List<Item> matched = new List<Item> { item };
+        List<Item> matched = new List<Item> { item }; // List for matched items
         int lowerItem = item.y - 1; // Imediatelly lower item
         int upperItem = item.y + 1; // Imediatelly upper item
+
+        // Starting from the swapped item, we search recursively for the lower items with same id until we found a different item
         while (lowerItem >= 0 && _items[item.x, lowerItem].id == item.id)
         {
             matched.Add(_items[item.x, lowerItem]);
             lowerItem--;
         }
+        // Same logic for upper items
         while (upperItem < height && _items[item.x, upperItem].id == item.id)
         {
             matched.Add(_items[item.x, upperItem]);
@@ -228,23 +238,24 @@ public class BoardManager : Singleton<BoardManager>
 
     void OnMouseOverItem(Item item)
     {
+        // If selected item is already select or player cannot play during animations, game setup, etc
         if (_selectedItem == item || !canPlay)
         {
-            _selectedItem = null;
-            SetSelectItems(false, item);
-            audioPlayer.PlaySound(selectSFX);
+            _selectedItem = null; // Unselect item
+            SetSelectItems(false, item); // Remove select status from item
             return;
         }
         if (_selectedItem == null)
         {
-            _selectedItem = item;
-            SetSelectItems(true, item);
-            audioPlayer.PlaySound(selectSFX);
+            _selectedItem = item; // There is no other item selected, select this one
+            SetSelectItems(true, item); // Update item select status
+            audioPlayer.PlaySound(selectSFX); // Play sound
         }
         else
         {
+            // We have 2 selected items
             Vector3 itemPos = new Vector3(item.x, item.y, 0);
-            Vector3 selectedPos = new Vector3(_selectedItem.x, _selectedItem.y, 0);
+            Vector3 selectedPos = new Vector3(_selectedItem.x, _selectedItem.y, 0); // Previously selected item
 
             // Check if selected is in permited radius (the neighbors always has distance 1)
             if ((itemPos - selectedPos).magnitude == 1)
@@ -256,7 +267,7 @@ public class BoardManager : Singleton<BoardManager>
             {
                 Debug.Log("This move is forbidden.");
             }
-            SetSelectItems(false, item, _selectedItem);
+            SetSelectItems(false, item, _selectedItem); // Set items select status to false
             _selectedItem = null;
         }
     }
@@ -307,6 +318,8 @@ public class BoardManager : Singleton<BoardManager>
         canPlay = true;
     }
 
+
+    // Swap item indices
     void SwapIndices(Item a, Item b)
     {
         int tempX = a.x;
@@ -315,6 +328,7 @@ public class BoardManager : Singleton<BoardManager>
         UpdateItemPositions(b, tempX, tempY);
     }
 
+    // Actual swap animation
     IEnumerator Swap(Item a, Item b)
     {
         StartCoroutine(a.transform.Move(b.transform.position, itemSwapTime));
@@ -322,6 +336,7 @@ public class BoardManager : Singleton<BoardManager>
         yield return new WaitForSeconds(itemSwapTime);
     }
 
+    // Set items select status
     void SetSelectItems(bool selected = true, params Item[] items)
     {
         for (int i = 0; i < items.Length; i++)
@@ -330,6 +345,7 @@ public class BoardManager : Singleton<BoardManager>
         }
     }
 
+    // Animation to vanish items
     IEnumerator DestroyMatch(List<Item> items)
     {
         foreach (var item in items)
@@ -340,6 +356,7 @@ public class BoardManager : Singleton<BoardManager>
         yield return null;
     }
 
+    // Actually destroy items' gameObject
     void DestroyMatchObjects(List<Item> items)
     {
         foreach (var item in items)
@@ -350,6 +367,7 @@ public class BoardManager : Singleton<BoardManager>
 
     void AddScore(int matchSize)
     {
+        // The match score is given by individual item score multiplied by match size
         scoreObject.Value += matchSize * itemScore;
     }
 
@@ -361,60 +379,68 @@ public class BoardManager : Singleton<BoardManager>
 
     IEnumerator UpdateBoardIndices(MatchInfo match)
     {
-        int minX = match.GetMinX();
-        int maxX = match.GetMaxX();
-        int minY = match.GetMinY();
-        int maxY = match.GetMaxY();
+        int minX = match.GetMinX(); // Minimum match horizontal position
+        int maxX = match.GetMaxX(); // Maximum match horizontal position
+        int minY = match.GetMinY(); // Minimum match vertical position
+        int maxY = match.GetMaxY(); // Maximum match vertical position
 
-        List<Item> fallingItems = new List<Item> { };
+        List<Item> fallingItems = new List<Item> { }; // List to hold items that must fall
 
-        if (minY == maxY) // We have to update several columns
+        if (minY == maxY) // Horizontal match, we have to update several columns (for the remaining upper items)
         {
-            for (int i = minX; i <= maxX; i++)
+            for (int i = minX; i <= maxX; i++) //Loop through horizontal positions
             {
-                for (int j = minY; j < height - 1; j++)
+                for (int j = minY; j < height - 1; j++) //Loop through vertical positions above match
                 {
                     Item upperIndex = _items[i, j + 1];
                     Item current = _items[i, j];
+
+                    // Do the swappingz
                     _items[i, j] = upperIndex;
                     _items[i, j + 1] = current;
                     _items[i, j].SetPosition(_items[i, j].x, _items[i, j].y - 1);
-                    fallingItems.Add(_items[i, j]);
+                    fallingItems.Add(_items[i, j]); // Set the item to fall
                 }
+
+                // Fill empty space with new random item
                 _items[i, height - 1] = InstantiateDoddle(i, height - 1, 0, 1);
                 Item newItem = _items[i, height - 1];
-                fallingItems.Add(newItem);
+                fallingItems.Add(newItem); // Fall this new item
             }
         }
-        else if (minX == maxX) // We have to update one column
+        else if (minX == maxX) // Vertical match, we have to update just one column
         {
             int matchHeight = (maxY - minY) + 1;
             int currentX = minX;
-            for (int j = minY + matchHeight; j <= height - 1; j++)
+            for (int j = minY + matchHeight; j <= height - 1; j++) // Loop throught vertical positions above match
             {
                 Item lowerIndex = _items[currentX, j - matchHeight];
                 Item current = _items[currentX, j];
+
+                //Do the swappingz
                 _items[currentX, j - matchHeight] = current;
                 _items[currentX, j] = lowerIndex;
             }
 
-            for (int y = 0; y < height - matchHeight; y++)
+            for (int y = 0; y < height - matchHeight; y++) // Update all items on column
             {
                 _items[currentX, y].SetPosition(currentX, y);
                 fallingItems.Add(_items[currentX, y]);
             }
-            for (int i = 0; i < match.Count; i++)
+            for (int i = 0; i < match.Count; i++) // Loop through match count
             {
-                _items[currentX, (height - 1) - i] = InstantiateDoddle(currentX, (height - 1) - i, 0, match.Count);
-                Item intantiated = _items[currentX, (height - 1) - i];
-                fallingItems.Add(intantiated);
+                int newYPos = (height - 1) - i; // Vertical position for the new item
+                _items[currentX, newYPos] = InstantiateDoddle(currentX, newYPos, 0, match.Count); // Instantiate new item
+                fallingItems.Add(_items[currentX, newYPos]); // Set new item to fall
             }
         }
 
-        yield return StartCoroutine(FallItems(fallingItems)); // Fall all items and waits for finish
+        yield return StartCoroutine(FallItems(fallingItems)); // Fall all items setted to fall and waits for finish
 
-        CheckForMatches();
-        if (!CheckForPossibleMoves())
+        CheckForMatches(); // Check for more matches after update
+
+        bool hasPossibleMoves = CheckForPossibleMoves();
+        if (!hasPossibleMoves)
         {
             Debug.Log("No more possible moves. Shuffling board.");
             ShuffleBoard(new System.Random());
@@ -427,8 +453,10 @@ public class BoardManager : Singleton<BoardManager>
     {
         foreach (var item in items)
         {
-            StartCoroutine(item.Fall(new Vector3(item.x, item.y, 0.0f), gravity));
+            StartCoroutine(item.Fall(new Vector3(item.x, item.y, 0.0f), gravity)); // Fall item to position
         }
+
+        // Keep on this coroutine until all items has finished falling
         bool hasFallingItems = true;
         while (hasFallingItems)
         {
@@ -442,6 +470,7 @@ public class BoardManager : Singleton<BoardManager>
         yield return null;
     }
 
+    // Check for matches on entire board
     IEnumerator CheckForMatches()
     {
         //Loop along x axis
@@ -454,22 +483,23 @@ public class BoardManager : Singleton<BoardManager>
                 if (matchInfo.valid)
                 {
                     AddScore(matchInfo.match.Count);
-                    StartCoroutine(DestroyMatch(matchInfo.match));
-                    yield return StartCoroutine(UpdateBoardIndices(matchInfo));
-                    DestroyMatchObjects(matchInfo.match);
+                    StartCoroutine(DestroyMatch(matchInfo.match)); // Destroy animation
+                    yield return StartCoroutine(UpdateBoardIndices(matchInfo)); // Update
+                    DestroyMatchObjects(matchInfo.match); // Destroy gameObjects
 
-                    yield return new WaitForSeconds(delayBetweenMatches);
+                    yield return new WaitForSeconds(delayBetweenMatches); // Wait before next check
                 }
             }
         }
     }
 
+    // Check for possible moves on entire board
     bool CheckForPossibleMoves()
     {
 
         MatchInfo matchA;
         MatchInfo matchB;
-        List<List<Item>> possibleSwaps = new List<List<Item>>(); // TODO: Saving and return the first swap that gives a match for later reuse (hint for moves)
+        List<List<Item>> possibleSwaps = new List<List<Item>>(); // TODO: Saving and return the first swap that gives a match for later reuse (eg. hint for moves)
         for (int x = 0; x < width - 1; x++)
         {
             //Loop along y axis
@@ -479,7 +509,8 @@ public class BoardManager : Singleton<BoardManager>
                 Item upperItem = _items[x, y + 1];
                 Item rightItem = _items[x + 1, y];
 
-                SwapIndices(current, rightItem);
+                // We only have to check for righty items (as for the left items was already checked before)
+                SwapIndices(current, rightItem); // As we dont want to make the actual swap, we only swap board positions for checking
                 matchA = GetMatch(current);
                 matchB = GetMatch(rightItem);
                 if (matchA.valid || matchB.valid)
@@ -488,6 +519,7 @@ public class BoardManager : Singleton<BoardManager>
                 }
                 SwapIndices(current, rightItem); // Swap back as we dont want the actual swap
 
+                // We only have to check for upper items (as for the lower items was already checked before)
                 SwapIndices(current, upperItem);
                 matchA = GetMatch(current);
                 matchB = GetMatch(upperItem);
@@ -503,7 +535,7 @@ public class BoardManager : Singleton<BoardManager>
     }
     void OnDisable()
     {
-        Item.OnMouseOverItemEventHandler -= OnMouseOverItem;
+        Item.OnMouseOverItemEventHandler -= OnMouseOverItem; // Remove subscription callback
     }
 
 }

@@ -3,9 +3,6 @@ using System.Collections.Generic;
 
 public class MatchInfo
 {
-    public int matchStart;
-    public int matchEnd;
-
     private List<Item> _match = null;
     public List<Item> match
     {

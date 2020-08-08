@@ -18,9 +18,14 @@ Everytime the player scores, the gems need to be moved down and freeing up place
 - The game must be implemented in Portrait orientation, and the game board and UI must works in differenct resolutions and aspect ratios.
 - Delivery: the project must be uploaded into a github repository
 
+**Run**
+
+- Install Unity version 2019.4 official release
+
 **Features**
 
 - Scriptable Objects based architecture
 - Simple physics mechanics
 - TextMesh fonts assets
 - Some tooling scripts for better development workflow
+- Android build support (tested on a Android 10)
