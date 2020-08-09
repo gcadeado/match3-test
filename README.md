@@ -24,7 +24,7 @@ Everytime the player scores, the gems need to be moved down and freeing up place
 
 **Features**
 
-- Scriptable Objects based architecture
+- Scriptable Objects event-based architecture
 - Simple physics mechanics
 - TextMesh fonts assets
 - Some tooling scripts for better development workflow
