@@ -2,7 +2,7 @@
 
 ![Gameplay footage](https://user-images.githubusercontent.com/1725075/89704704-b6fc5500-d92c-11ea-8c02-6aee59d17d8a.gif)
 
-This is a complete game for an admission test. Feel free to use and support.
+This is a complete game for an admission test. You can play the game by building it youself in Unity.
 
 **Game concept**
 
@@ -20,7 +20,8 @@ Everytime the player scores, the gems need to be moved down and freeing up place
 
 **Run**
 
-- Install Unity version 2019.4 official release
+- Install Unity version 2019.4.3f1 official release
+- Import and run project on Unity
 
 **Features**
 
@@ -29,3 +30,9 @@ Everytime the player scores, the gems need to be moved down and freeing up place
 - TextMesh fonts assets
 - Some tooling scripts for better development workflow
 - Android build support (tested on a Android 10)
+
+***A note regards ScriptableObject based architecture***
+
+When using Singletons as global references to objects (like a Game Manager or an Audio Manager), our prefabs can't directly reference it in the inspector. Also, we can easily run into the problem of Singletons initializing each other, turning it into a inter-dependant mess.
+
+To avoid these problems, we can use ScriptableObjects for the "global access" and keep the code modular. It can be also used for a lot of other very useful purposes. [Check out this talk](https://www.youtube.com/watch?v=raQ3iHhE_Kk) in Unite Austin 2017 conference, which explains it in great details.
