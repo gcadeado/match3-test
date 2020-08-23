@@ -236,8 +236,9 @@ public class BoardManager : Singleton<BoardManager>
         return matched;
     }
 
-    void OnMouseOverItem(Item item)
+    void OnMouseOverItem(Item item, SwipeDirection direction)
     {
+
         // If selected item is already select or player cannot play during animations, game setup, etc
         if (_selectedItem == item || !canPlay)
         {
@@ -245,31 +246,75 @@ public class BoardManager : Singleton<BoardManager>
             SetSelectItems(false, item); // Remove select status from item
             return;
         }
-        if (_selectedItem == null)
-        {
-            _selectedItem = item; // There is no other item selected, select this one
-            SetSelectItems(true, item); // Update item select status
-            audioPlayer.PlaySound(selectSFX); // Play sound
-        }
-        else
-        {
-            // We have 2 selected items
-            Vector3 itemPos = new Vector3(item.x, item.y, 0);
-            Vector3 selectedPos = new Vector3(_selectedItem.x, _selectedItem.y, 0); // Previously selected item
 
-            // Check if selected is in permited radius (the neighbors always has distance 1)
-            if ((itemPos - selectedPos).magnitude == 1)
+        if (direction == SwipeDirection.None)
+        {
+            if (_selectedItem == null)
             {
-                // Try to swap items
-                StartCoroutine(TryMatch(_selectedItem, item));
+                _selectedItem = item; // There is no other item selected, select this one
+                SetSelectItems(true, item); // Update item select status
+                audioPlayer.PlaySound(selectSFX); // Play sound
             }
             else
             {
-                Debug.Log("This move is forbidden.");
+                // We have 2 selected items
+                Vector3 itemPos = new Vector3(item.x, item.y, 0);
+                Vector3 selectedPos = new Vector3(_selectedItem.x, _selectedItem.y, 0); // Previously selected item
+
+                // Check if selected is in permited radius (the neighbors always has distance 1)
+                if ((itemPos - selectedPos).magnitude == 1)
+                {
+                    // Try to swap items
+                    StartCoroutine(TryMatch(_selectedItem, item));
+                }
+                else
+                {
+                    Debug.Log("This move is forbidden.");
+                }
+                SetSelectItems(false, item, _selectedItem); // Set items select status to false
+                _selectedItem = null;
             }
-            SetSelectItems(false, item, _selectedItem); // Set items select status to false
-            _selectedItem = null;
         }
+        else
+        {
+            Vector3 itemPos = new Vector3(item.x, item.y, 0);
+            Item nextItem = null;
+            switch (direction)
+            {
+                case SwipeDirection.Up:
+                    if (item.y + 1 < height)
+                    {
+                        nextItem = _items[item.x, item.y + 1];
+                    }
+                    break;
+                case SwipeDirection.Right:
+                    if (item.x + 1 < width)
+                    {
+                        nextItem = _items[item.x + 1, item.y];
+                    }
+                    break;
+                case SwipeDirection.Down:
+                    if (item.y - 1 >= 0)
+                    {
+                        nextItem = _items[item.x, item.y - 1];
+                    }
+                    break;
+                case SwipeDirection.Left:
+                    if (item.x - 1 >= 0)
+                    {
+                        nextItem = _items[item.x - 1, item.y];
+                    }
+                    break;
+                default:
+                    break;
+            }
+            if (nextItem)
+            {
+                StartCoroutine(TryMatch(item, nextItem));
+            }
+        }
+
+
     }
 
     IEnumerator TryMatch(Item a, Item b)

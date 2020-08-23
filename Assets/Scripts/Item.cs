@@ -2,11 +2,23 @@
 using UnityEngine;
 using UnityEditor;
 
+public enum SwipeDirection
+{
+    None,
+    Up,
+    Right,
+    Down,
+    Left
+}
+
 public class Item : MonoBehaviour
 {
     public int x; // Horizontal position
 
     public int y; // Vertical position
+
+    private Vector2 initialTouchPosition;
+    private Vector2 finalTouchPosition;
 
     public int id;
 
@@ -70,10 +82,60 @@ public class Item : MonoBehaviour
 
     void OnMouseDown()
     {
+        float cameraZPos = Camera.main.transform.position.z;
+        initialTouchPosition = new Vector2(x, y);
+    }
+
+    void OnMouseUp()
+    {
+        float cameraZPos = Camera.main.transform.position.z;
+        finalTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition + new Vector3(0f, 0f, -cameraZPos));
+
+
+        float angle = CalculateAngle(initialTouchPosition, finalTouchPosition);
         if (OnMouseOverItemEventHandler != null)
         {
-            OnMouseOverItemEventHandler(this);
+            SwipeDirection direction = SwipeDirection.None;
+            float max = GetSwipeMajorAxis(initialTouchPosition, finalTouchPosition);
+            if (max > 0.5f)
+            {
+                if (angle > -45f && angle <= 45f)
+                {
+                    direction = SwipeDirection.Right;
+                }
+                else if (angle > 45f && angle <= 135f)
+                {
+                    direction = SwipeDirection.Up;
+                }
+                else if (angle > 135f || angle <= -135f)
+                {
+                    direction = SwipeDirection.Left;
+                }
+                else if (angle > -135f && angle <= -45f)
+                {
+                    direction = SwipeDirection.Down;
+                }
+            }
+
+            OnMouseOverItemEventHandler(this, direction);
         }
+    }
+
+    float CalculateAngle(Vector2 initial, Vector2 final)
+    {
+        float xDiff = final.x - initial.x;
+        float yDiff = final.y - initial.y;
+        float angle = Mathf.Atan2(yDiff, xDiff) * 180f / Mathf.PI;
+        Debug.Log("Found angle: " + angle);
+        return angle;
+    }
+
+    float GetSwipeMajorAxis(Vector2 initial, Vector2 final)
+    {
+        float maxX = Mathf.Abs(final.x - initial.x);
+        float maxY = Mathf.Abs(final.y - initial.y);
+
+        return Mathf.Max(maxX, maxY);
     }
 
 #if UNITY_EDITOR
@@ -84,6 +146,6 @@ public class Item : MonoBehaviour
     }
 #endif
 
-    public delegate void OnMouseOverItem(Item item);
+    public delegate void OnMouseOverItem(Item item, SwipeDirection direction);
     public static event OnMouseOverItem OnMouseOverItemEventHandler;
 }
