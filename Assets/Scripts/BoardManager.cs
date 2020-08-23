@@ -247,6 +247,7 @@ public class BoardManager : Singleton<BoardManager>
             return;
         }
 
+        // If input is lesser then swipe threshold, we consider it as a "click"
         if (direction == SwipeDirection.None)
         {
             if (_selectedItem == null)
@@ -277,45 +278,45 @@ public class BoardManager : Singleton<BoardManager>
         }
         else
         {
-            Vector3 itemPos = new Vector3(item.x, item.y, 0);
+            // Input is a swipe
             Item nextItem = null;
-            switch (direction)
+            if (direction == SwipeDirection.Up && item.y + 1 < height)
             {
-                case SwipeDirection.Up:
-                    if (item.y + 1 < height)
-                    {
-                        nextItem = _items[item.x, item.y + 1];
-                    }
-                    break;
-                case SwipeDirection.Right:
-                    if (item.x + 1 < width)
-                    {
-                        nextItem = _items[item.x + 1, item.y];
-                    }
-                    break;
-                case SwipeDirection.Down:
-                    if (item.y - 1 >= 0)
-                    {
-                        nextItem = _items[item.x, item.y - 1];
-                    }
-                    break;
-                case SwipeDirection.Left:
-                    if (item.x - 1 >= 0)
-                    {
-                        nextItem = _items[item.x - 1, item.y];
-                    }
-                    break;
-                default:
-                    break;
+                // If direction is up and in board size bounds, select upper item
+                nextItem = _items[item.x, item.y + 1];
             }
+            else if (direction == SwipeDirection.Right && item.x + 1 < width)
+            {
+                // If direction is right and in board size bounds, select right item
+                nextItem = _items[item.x + 1, item.y];
+            }
+
+            else if (direction == SwipeDirection.Down && item.y - 1 >= 0)
+            {
+                // If direction is down and in board size bounds, select lower item
+                nextItem = _items[item.x, item.y - 1];
+            }
+
+            else if (direction == SwipeDirection.Left && item.x - 1 >= 0)
+            {
+                // If direction is left and in board size bounds, select left item
+                nextItem = _items[item.x - 1, item.y];
+            }
+
             if (nextItem)
             {
-                StartCoroutine(TryMatch(item, nextItem));
+                StartCoroutine(TryMatch(item, nextItem)); // Try a match
+            }
+
+            if (_selectedItem)
+            {
+                // Reset a previously selected item
+                SetSelectItems(false, _selectedItem); // Set items select status to false
+                _selectedItem = null;
             }
         }
-
-
     }
+
 
     IEnumerator TryMatch(Item a, Item b)
     {
