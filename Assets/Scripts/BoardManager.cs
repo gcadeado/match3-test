@@ -236,8 +236,9 @@ public class BoardManager : Singleton<BoardManager>
         return matched;
     }
 
-    void OnMouseOverItem(Item item)
+    void OnMouseOverItem(Item item, SwipeDirection direction)
     {
+
         // If selected item is already select or player cannot play during animations, game setup, etc
         if (_selectedItem == item || !canPlay)
         {
@@ -245,32 +246,77 @@ public class BoardManager : Singleton<BoardManager>
             SetSelectItems(false, item); // Remove select status from item
             return;
         }
-        if (_selectedItem == null)
-        {
-            _selectedItem = item; // There is no other item selected, select this one
-            SetSelectItems(true, item); // Update item select status
-            audioPlayer.PlaySound(selectSFX); // Play sound
-        }
-        else
-        {
-            // We have 2 selected items
-            Vector3 itemPos = new Vector3(item.x, item.y, 0);
-            Vector3 selectedPos = new Vector3(_selectedItem.x, _selectedItem.y, 0); // Previously selected item
 
-            // Check if selected is in permited radius (the neighbors always has distance 1)
-            if ((itemPos - selectedPos).magnitude == 1)
+        // If input is lesser then swipe threshold, we consider it as a "click"
+        if (direction == SwipeDirection.None)
+        {
+            if (_selectedItem == null)
             {
-                // Try to swap items
-                StartCoroutine(TryMatch(_selectedItem, item));
+                _selectedItem = item; // There is no other item selected, select this one
+                SetSelectItems(true, item); // Update item select status
+                audioPlayer.PlaySound(selectSFX); // Play sound
             }
             else
             {
-                Debug.Log("This move is forbidden.");
+                // We have 2 selected items
+                Vector3 itemPos = new Vector3(item.x, item.y, 0);
+                Vector3 selectedPos = new Vector3(_selectedItem.x, _selectedItem.y, 0); // Previously selected item
+
+                // Check if selected is in permited radius (the neighbors always has distance 1)
+                if ((itemPos - selectedPos).magnitude == 1)
+                {
+                    // Try to swap items
+                    StartCoroutine(TryMatch(_selectedItem, item));
+                }
+                else
+                {
+                    Debug.Log("This move is forbidden.");
+                }
+                SetSelectItems(false, item, _selectedItem); // Set items select status to false
+                _selectedItem = null;
             }
-            SetSelectItems(false, item, _selectedItem); // Set items select status to false
-            _selectedItem = null;
+        }
+        else
+        {
+            // Input is a swipe
+            Item nextItem = null;
+            if (direction == SwipeDirection.Up && item.y + 1 < height)
+            {
+                // If direction is up and in board size bounds, select upper item
+                nextItem = _items[item.x, item.y + 1];
+            }
+            else if (direction == SwipeDirection.Right && item.x + 1 < width)
+            {
+                // If direction is right and in board size bounds, select right item
+                nextItem = _items[item.x + 1, item.y];
+            }
+
+            else if (direction == SwipeDirection.Down && item.y - 1 >= 0)
+            {
+                // If direction is down and in board size bounds, select lower item
+                nextItem = _items[item.x, item.y - 1];
+            }
+
+            else if (direction == SwipeDirection.Left && item.x - 1 >= 0)
+            {
+                // If direction is left and in board size bounds, select left item
+                nextItem = _items[item.x - 1, item.y];
+            }
+
+            if (nextItem)
+            {
+                StartCoroutine(TryMatch(item, nextItem)); // Try a match
+            }
+
+            if (_selectedItem)
+            {
+                // Reset a previously selected item
+                SetSelectItems(false, _selectedItem); // Set items select status to false
+                _selectedItem = null;
+            }
         }
     }
+
 
     IEnumerator TryMatch(Item a, Item b)
     {

@@ -8,6 +8,8 @@ public class Item : MonoBehaviour
 
     public int y; // Vertical position
 
+    private Vector2 finalTouchPosition;
+
     public int id;
 
     public bool isFalling; // Referece to check if object is falling
@@ -68,11 +70,16 @@ public class Item : MonoBehaviour
         isFalling = false;
     }
 
-    void OnMouseDown()
+    void OnMouseUp()
     {
+        // We get the camera to cancel the Z vector and ScreenToWorldPoint returns distances in the same Z value
+        float cameraZPos = Camera.main.transform.position.z;
+        finalTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition + new Vector3(0f, 0f, -cameraZPos));
+
         if (OnMouseOverItemEventHandler != null)
         {
-            OnMouseOverItemEventHandler(this);
+            SwipeDirection direction = InputHelpers.GetSwipeDirection(new Vector2(x, y), finalTouchPosition, 0.5f);
+            OnMouseOverItemEventHandler(this, direction);
         }
     }
 
@@ -84,6 +91,6 @@ public class Item : MonoBehaviour
     }
 #endif
 
-    public delegate void OnMouseOverItem(Item item);
+    public delegate void OnMouseOverItem(Item item, SwipeDirection direction);
     public static event OnMouseOverItem OnMouseOverItemEventHandler;
 }
