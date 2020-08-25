@@ -2,7 +2,7 @@
 
 ![Gameplay footage](https://user-images.githubusercontent.com/1725075/89704704-b6fc5500-d92c-11ea-8c02-6aee59d17d8a.gif)
 
-This is a complete game for an admission test. You can play the game by building it youself in Unity.
+This is a complete game for an admission test. You can play the game by building it youself in Unity, or by downloading the latest release in the [releases page](https://github.com/gcadeado/match3-test/releases).
 
 **Game concept**
 
