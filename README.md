@@ -27,6 +27,7 @@ Everytime the player scores, the gems need to be moved down and freeing up place
 
 - Scriptable Objects event-based architecture
 - Simple physics mechanics
+- Hybrid point-and-click and swipe based controls
 - TextMesh fonts assets
 - Some tooling scripts for better development workflow
 - Android build support (tested on a Android 10)
